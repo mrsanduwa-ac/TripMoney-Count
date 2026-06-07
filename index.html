@@ -6,14 +6,12 @@
     <title>Colombo Trip Tracker</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* * EXACT COLOR PALETTE FROM UPLOADED IMAGE 
-         */
         :root {
-            --color-1: #0062cc; /* Darkest Blue - Primary */
-            --color-2: #009cda; /* Cerulean - Secondary */
-            --color-3: #78d2f6; /* Sky Blue - Accents */
-            --color-4: #c2ecfc; /* Pale Blue - Hover states */
-            --color-5: #eff9ff; /* Ice Blue - App Background */
+            --color-1: #0062cc;
+            --color-2: #009cda;
+            --color-3: #78d2f6;
+            --color-4: #c2ecfc;
+            --color-5: #eff9ff;
             
             --surface: #ffffff;
             --text-main: #1e293b;
@@ -45,8 +43,7 @@
             align-items: center;
         }
 
-        /* * LIVE ANIMATED SKY BACKGROUND
-         */
+        /* LIVE ANIMATED SKY BACKGROUND */
         .live-bg-container {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -100,7 +97,7 @@
             box-shadow: 0 0 40px rgba(0,0,0,0.1);
         }
 
-        /* Header - Transparent/Clean */
+        /* Header */
         header {
             padding: 24px;
             display: flex;
@@ -118,29 +115,22 @@
             text-shadow: 0 2px 4px rgba(255,255,255,0.8);
         }
 
-        .sync-icon {
-            width: 24px; height: 24px;
-            border: 3px solid var(--color-1);
-            border-radius: 50%;
-            border-top-color: transparent;
-            opacity: 0;
-            transform: scale(0.5);
-            transition: all 0.4s ease;
+        /* NEW Sync Badge UI */
+        .sync-badge {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 14px; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 600; color: var(--color-1);
+            cursor: pointer; box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
         }
-        .sync-icon.syncing {
-            opacity: 1; transform: scale(1);
-            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-            border-top-color: transparent;
-        }
-        .sync-icon.success {
-            opacity: 1; transform: scale(1);
-            border-color: var(--success);
-            background: var(--success);
-            animation: pulseSuccess 0.6s ease-out forwards;
-        }
+        .sync-badge:active { transform: scale(0.95); }
+        .sync-badge.syncing #syncIconSvg { animation: spin 1s linear infinite; }
+        .sync-badge.done { background: var(--success); color: white; }
+        .sync-badge.done #syncIconSvg { stroke: white; }
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes pulseSuccess { 50% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 0; } }
 
         /* Budget Progress */
         .budget-wrapper {
@@ -190,7 +180,7 @@
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Floating Add Bubble (+) */
+        /* Floating Add Bubble */
         .fab-add {
             position: absolute;
             bottom: 100px; right: 24px;
@@ -393,7 +383,6 @@
 </head>
 <body>
 
-    <!-- App Container -->
     <div class="app-container">
         
         <!-- Animated Sky Background Elements -->
@@ -406,7 +395,13 @@
         <!-- Header -->
         <header>
             <h1>TripTracker Pro</h1>
-            <div class="sync-icon" id="syncIcon"></div>
+            <!-- NEW Interactive Sync Badge -->
+            <div class="sync-badge" id="syncBadge" onclick="syncWithCloud(false)">
+                <svg id="syncIconSvg" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+                </svg>
+                <span id="syncText">Sync</span>
+            </div>
         </header>
 
         <!-- Budget Progress -->
@@ -441,7 +436,7 @@
             </div>
         </div>
 
-        <!-- Floating Add Item Bubble (+) - Now always visible in List View -->
+        <!-- Floating Add Item Bubble (+) -->
         <div class="fab-add" id="fabAdd" onclick="openModal('addItemModal')" style="display: flex;">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </div>
@@ -499,7 +494,7 @@
         </div>
     </div>
 
-    <!-- Expense Modal (Items & Custom) -->
+    <!-- Expense Modal -->
     <div class="modal-overlay" id="expenseModal">
         <div class="modal-card">
             <div class="modal-title" id="expenseModalTitle">Add Expense</div>
@@ -533,7 +528,7 @@
         </div>
     </div>
 
-    <!-- Alert Modal (Professional Replacement for Browser Alerts) -->
+    <!-- Alert Modal -->
     <div class="modal-overlay" id="systemAlertModal">
         <div class="modal-card" style="text-align: center;">
             <div class="modal-title" id="alertTitle" style="margin-bottom: 12px;">Alert</div>
@@ -578,51 +573,143 @@
     </div>
 
     <script>
-        /* * ==========================================
+        /* ==========================================
          * DEPLOYMENT CONFIGURATION
          * Put your Google Apps Script Web App URL here
          * ==========================================
          */
         const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYCrEDOV_W9ZoMPGOjF9u3qMvVeeqyKDV7Irkm0us1VaW2QjRTduEsUvdJa8EhQQam4A/exec";
 
-        // State Management
         let appState = {
             isTripStarted: false,
             initialBudget: 0,
             spent: 0,
             shoppingList: [],
             tripsHistory: [],
-            currentTripExpenses: [], // Tracks non-item expenses
-            lastAction: null
+            currentTripExpenses: [],
+            lastAction: null,
+            lastUpdated: Date.now()
         };
 
         let activeItemId = null;
         let isCustomExpense = false;
         let longPressTimeout = null;
 
-        // Initialize App
         window.addEventListener('DOMContentLoaded', () => {
-            if(localStorage.getItem('colombo_pro_v4')) {
-                appState = JSON.parse(localStorage.getItem('colombo_pro_v4'));
-                // Migrate old state structure if missing currentTripExpenses
-                if(!appState.currentTripExpenses) appState.currentTripExpenses = [];
+            if(localStorage.getItem('colombo_pro_v5')) {
+                let savedState = JSON.parse(localStorage.getItem('colombo_pro_v5'));
+                appState = { ...appState, ...savedState };
             }
             renderApp();
             setupLongPress();
+            
+            // Auto sync check on load if URL exists
+            if(GOOGLE_APPS_SCRIPT_URL && !GOOGLE_APPS_SCRIPT_URL.includes("YOUR_DEPLOYED")) {
+                syncWithCloud(true);
+            }
         });
 
         function saveState() {
-            localStorage.setItem('colombo_pro_v4', JSON.stringify(appState));
-            triggerSyncAnimation();
+            appState.lastUpdated = Date.now();
+            localStorage.setItem('colombo_pro_v5', JSON.stringify(appState));
+            pushStateToCloudSilently(); // Background sync backup
         }
 
-        function triggerSyncAnimation() {
-            const syncIcon = document.getElementById('syncIcon');
-            syncIcon.className = 'sync-icon syncing';
-            setTimeout(() => {
-                syncIcon.className = 'sync-icon success';
-                setTimeout(() => syncIcon.className = 'sync-icon', 600);
-            }, 500);
+        /* NEW TWO-WAY SYNC LOGIC FOR MULTIPLE DEVICES */
+        async function syncWithCloud(isAuto = false) {
+            if(!GOOGLE_APPS_SCRIPT_URL || GOOGLE_APPS_SCRIPT_URL.includes("YOUR_DEPLOYED")) {
+                if(!isAuto) showCustomAlert("Setup Required", "Please add your Google Apps Script URL in the code to enable Cloud Sync.", false);
+                return;
+            }
+
+            const badge = document.getElementById('syncBadge');
+            const text = document.getElementById('syncText');
+            const icon = document.getElementById('syncIconSvg');
+
+            badge.classList.add('syncing');
+            text.innerText = "Syncing...";
+            
+            try {
+                // Pull latest from cloud
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL);
+                const result = await response.json();
+                
+                if(result.status === 'success' && result.state) {
+                    const cloudUpdated = result.state.lastUpdated || 0;
+                    const localUpdated = appState.lastUpdated || 0;
+                    
+                    if(cloudUpdated > localUpdated) {
+                        // Cloud has newer data, update device
+                        appState = result.state;
+                        localStorage.setItem('colombo_pro_v5', JSON.stringify(appState));
+                        renderApp();
+                    } else if (localUpdated > cloudUpdated) {
+                        // Local is newer, update cloud
+                        await pushStateToCloudSilently(false); 
+                    }
+                } else if (!result.state) {
+                    // Empty cloud, upload initial local
+                    await pushStateToCloudSilently(false);
+                }
+
+                // Show success UI (Done Checkmark)
+                badge.classList.remove('syncing');
+                badge.classList.add('done');
+                text.innerText = "Done";
+                icon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>'; 
+                
+                setTimeout(() => {
+                    badge.classList.remove('done');
+                    text.innerText = "Sync";
+                    icon.innerHTML = '<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>'; 
+                }, 2500);
+
+            } catch (error) {
+                console.error("Sync Error:", error);
+                badge.classList.remove('syncing');
+                text.innerText = "Failed";
+                setTimeout(() => { text.innerText = "Sync"; }, 2500);
+            }
+        }
+
+        // Silent Push triggered on every app change
+        async function pushStateToCloudSilently(showUi = true) {
+            if(!GOOGLE_APPS_SCRIPT_URL || GOOGLE_APPS_SCRIPT_URL.includes("YOUR_DEPLOYED")) return;
+            
+            const badge = document.getElementById('syncBadge');
+            const text = document.getElementById('syncText');
+            const icon = document.getElementById('syncIconSvg');
+
+            if(showUi) {
+                badge.classList.add('syncing');
+                text.innerText = "Saving...";
+            }
+
+            try {
+                await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'backup', state: appState })
+                });
+
+                if(showUi) {
+                    badge.classList.remove('syncing');
+                    badge.classList.add('done');
+                    text.innerText = "Done";
+                    icon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+                    
+                    setTimeout(() => {
+                        badge.classList.remove('done');
+                        text.innerText = "Sync";
+                        icon.innerHTML = '<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>';
+                    }, 2000);
+                }
+            } catch(e) {
+                if(showUi) {
+                    badge.classList.remove('syncing');
+                    text.innerText = "Sync";
+                }
+            }
         }
 
         function showCustomAlert(title, message, isConfirm, onConfirm) {
@@ -698,14 +785,12 @@
 
             document.getElementById('undoBtn').style.display = appState.lastAction ? 'block' : 'none';
 
-            // Render History Cards
             const historyContainer = document.getElementById('expensesHistoryContainer');
             if(appState.tripsHistory.length === 0) {
                 historyContainer.innerHTML = '<div class="empty-state">No previous trips recorded.</div>';
             } else {
                 historyContainer.innerHTML = '';
                 [...appState.tripsHistory].reverse().forEach((trip, index) => {
-                    // Reverse index mapping to original array
                     const originalIndex = appState.tripsHistory.length - 1 - index;
                     const bal = trip.budget - trip.spent;
                     const card = document.createElement('div');
@@ -741,13 +826,13 @@
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             
             document.getElementById(`view-${view}`).classList.add('active');
-            document.querySelectorAll('.nav-tab')[view === 'list' ? 0 : 2].classList.add('active');
             
-            // FAB is always visible in 'list' view to allow prepping the list
+            // BUG FIX: Switch Error Fixed! Index is either 0 or 1.
+            document.querySelectorAll('.nav-tab')[view === 'list' ? 0 : 1].classList.add('active');
+            
             document.getElementById('fabAdd').style.display = (view === 'list') ? 'flex' : 'none';
         }
 
-        // Modals Logic
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
@@ -894,13 +979,13 @@
 
             appState.tripsHistory.push(tripData);
             
-            if(GOOGLE_APPS_SCRIPT_URL !== "YOUR_DEPLOYED_WEB_APP_URL_HERE") {
+            // Push Trip Record to Google Sheet specifically
+            if(GOOGLE_APPS_SCRIPT_URL && !GOOGLE_APPS_SCRIPT_URL.includes("YOUR_DEPLOYED")) {
                 fetch(GOOGLE_APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(tripData)
-                }).catch(err => console.log("Sync Error", err));
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'endTrip', data: tripData })
+                }).catch(err => console.log("Log Error", err));
             }
 
             appState.isTripStarted = false;
@@ -940,7 +1025,6 @@
             document.getElementById('historyDetailContent').innerHTML = contentHTML;
             openModal('historyDetailModal');
         }
-
     </script>
 </body>
 </html>

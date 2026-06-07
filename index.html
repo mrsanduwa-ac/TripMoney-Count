@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Colombo Trip Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* * EXACT COLOR PALETTE FROM UPLOADED IMAGE 
+         */
+        :root {
+            --color-1: #0062cc; /* Darkest Blue - Primary */
+            --color-2: #009cda; /* Cerulean - Secondary */
+            --color-3: #78d2f6; /* Sky Blue - Accents */
+            --color-4: #c2ecfc; /* Pale Blue - Hover states */
+            --color-5: #eff9ff; /* Ice Blue - App Background */
+            
+            --surface: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --border: #e2e8f0;
+            
+            --shadow-sm: 0 2px 8px rgba(0, 98, 204, 0.08);
+            --shadow-md: 0 8px 16px rgba(0, 98, 204, 0.12);
+            --shadow-lg: 0 16px 32px rgba(0, 98, 204, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #e2e8f0;
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* * LIVE ANIMATED SKY BACKGROUND
+         */
+        .live-bg-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, var(--color-3) 0%, var(--color-5) 100%);
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50px;
+            filter: blur(1px);
+            animation: floatCloud linear infinite;
+        }
+
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+        }
+
+        .cloud-1 { width: 120px; height: 35px; top: 15%; left: -150px; animation-duration: 35s; opacity: 0.8;}
+        .cloud-1::before { width: 60px; height: 60px; top: -25px; left: 15px; }
+        .cloud-1::after { width: 50px; height: 50px; top: -15px; left: 55px; }
+
+        .cloud-2 { width: 90px; height: 25px; top: 40%; left: -100px; animation-duration: 25s; opacity: 0.6; transform: scale(0.8);}
+        .cloud-2::before { width: 45px; height: 45px; top: -20px; left: 10px; }
+        .cloud-2::after { width: 35px; height: 35px; top: -10px; left: 40px; }
+
+        .cloud-3 { width: 150px; height: 45px; top: 65%; left: -200px; animation-duration: 45s; opacity: 0.7; transform: scale(1.2);}
+        .cloud-3::before { width: 75px; height: 75px; top: -35px; left: 20px; }
+        .cloud-3::after { width: 60px; height: 60px; top: -20px; left: 70px; }
+
+        @keyframes floatCloud {
+            0% { transform: translateX(-10vw); }
+            100% { transform: translateX(120vw); }
+        }
+
+        /* App Container */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100%;
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 0 40px rgba(0,0,0,0.1);
+        }
+
+        /* Header - Transparent/Clean */
+        header {
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: transparent;
+            z-index: 10;
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--color-1);
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(255,255,255,0.8);
+        }
+
+        .sync-icon {
+            width: 24px; height: 24px;
+            border: 3px solid var(--color-1);
+            border-radius: 50%;
+            border-top-color: transparent;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.4s ease;
+        }
+        .sync-icon.syncing {
+            opacity: 1; transform: scale(1);
+            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            border-top-color: transparent;
+        }
+        .sync-icon.success {
+            opacity: 1; transform: scale(1);
+            border-color: var(--success);
+            background: var(--success);
+            animation: pulseSuccess 0.6s ease-out forwards;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulseSuccess { 50% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 0; } }
+
+        /* Budget Progress */
+        .budget-wrapper {
+            padding: 16px 24px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            animation: slideDown 0.4s ease forwards;
+            border-radius: 20px;
+            margin: 0 16px 16px 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .budget-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .budget-info .spent { color: var(--text-main); font-weight: 600; }
+        .budget-info .remaining { color: var(--color-1); font-weight: 700; }
+
+        .progress-bg {
+            width: 100%; height: 10px;
+            background: var(--color-4);
+            border-radius: 10px; overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .progress-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, var(--color-2), var(--color-1));
+            border-radius: 10px; 
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Main Content */
+        .content-view {
+            flex: 1; overflow-y: auto;
+            padding: 16px 24px 120px 24px;
+            display: none;
+        }
+        .content-view.active {
+            display: block; animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Floating Add Bubble (+) */
+        .fab-add {
+            position: absolute;
+            bottom: 100px; right: 24px;
+            width: 60px; height: 60px;
+            background: linear-gradient(135deg, var(--color-2), var(--color-1));
+            color: white; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 28px; font-weight: 300;
+            box-shadow: 0 10px 25px rgba(0, 98, 204, 0.4);
+            cursor: pointer; z-index: 15;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .fab-add:active { transform: scale(0.85); }
+        .fab-add:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0, 98, 204, 0.5); }
+
+        /* Item Rows */
+        .item-row {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            padding: 18px; border-radius: 16px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow-sm);
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; transition: all 0.2s ease;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .item-row:active { transform: scale(0.97); }
+        .item-row.done { 
+            opacity: 0.7; background: rgba(248, 250, 252, 0.9);
+            border-left: 4px solid var(--success);
+        }
+        .item-row.done .item-title { text-decoration: line-through; color: var(--text-muted); }
+        .item-row.not-found { 
+            border-left: 4px solid var(--danger); 
+            background: rgba(254, 242, 242, 0.9); 
+        }
+        
+        .item-title { font-weight: 600; font-size: 1rem; color: var(--text-main); }
+        .item-note { font-size: 0.8rem; color: var(--color-2); margin-top: 6px; font-weight: 500; }
+        .item-price { font-weight: 700; color: var(--color-1); font-size: 1.05rem; }
+
+        /* History Table */
+        .history-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .history-card:active { transform: scale(0.98); }
+        .history-header {
+            background: var(--color-1);
+            color: white; padding: 16px;
+            font-weight: 600; font-size: 0.95rem;
+            display: flex; justify-content: space-between;
+            align-items: center;
+        }
+        .history-header .click-hint {
+            font-size: 0.75rem; font-weight: 400; background: rgba(255,255,255,0.2);
+            padding: 4px 8px; border-radius: 12px;
+        }
+        .history-body { padding: 16px; }
+        .history-stat {
+            display: flex; justify-content: space-between;
+            margin-bottom: 10px; font-size: 0.9rem;
+        }
+        .history-stat:last-child { margin-bottom: 0; padding-top: 10px; border-top: 1px dashed var(--border); font-weight: 600; }
+        .history-stat span:first-child { color: var(--text-muted); }
+
+        /* Forms & Buttons */
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label {
+            display: block; font-size: 0.85rem; color: var(--color-1);
+            margin-bottom: 8px; font-weight: 600;
+        }
+        .form-control {
+            width: 100%; padding: 16px;
+            background: var(--color-5); border: 2px solid var(--color-4);
+            border-radius: 12px; color: var(--text-main);
+            font-size: 1rem; outline: none; transition: all 0.3s;
+            font-weight: 500;
+        }
+        .form-control:focus { border-color: var(--color-2); background: #fff; box-shadow: 0 0 0 4px rgba(0, 156, 218, 0.1); }
+        
+        .btn {
+            width: 100%; padding: 16px;
+            background: var(--color-1); color: white;
+            border: none; border-radius: 12px;
+            font-weight: 600; font-size: 1rem; letter-spacing: 0.5px;
+            cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 98, 204, 0.2);
+        }
+        .btn:active { transform: scale(0.96); background: var(--color-1); }
+        .btn-outline {
+            background: transparent; color: var(--text-muted);
+            border: 2px solid var(--border); box-shadow: none;
+        }
+
+        /* Footer Navigation */
+        footer {
+            position: absolute; bottom: 0; left: 0;
+            width: 100%; height: 85px;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 20; padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-tab {
+            display: flex; flex-direction: column; align-items: center;
+            color: var(--text-muted); cursor: pointer;
+            font-size: 0.75rem; font-weight: 600; transition: all 0.3s; width: 70px;
+        }
+        .nav-tab.active { color: var(--color-1); transform: translateY(-2px); }
+        .nav-tab svg { width: 26px; height: 26px; margin-bottom: 4px; fill: currentColor; }
+
+        /* Center Action Button */
+        .center-btn-wrapper {
+            position: relative; width: 70px; height: 70px;
+            transform: translateY(-25px);
+        }
+        .center-action-btn {
+            width: 100%; height: 100%;
+            background: var(--surface);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            color: var(--color-1); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 4px solid var(--color-5); user-select: none;
+            flex-direction: column;
+        }
+        .center-action-btn:active { transform: scale(0.9); }
+        .center-action-btn.active-state {
+            background: linear-gradient(135deg, var(--color-2), var(--color-1));
+            color: white; border-color: white;
+            box-shadow: 0 12px 30px rgba(0, 98, 204, 0.3);
+        }
+        .center-action-btn span { font-weight: 700; font-size: 0.8rem; letter-spacing: 0.5px; }
+        .center-action-btn svg { width: 32px; height: 32px; display: none; fill: white; }
+
+        /* Custom Modals */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(8px);
+            z-index: 100; display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-card {
+            background: var(--surface); width: 90%; max-width: 360px;
+            border-radius: 24px; padding: 28px; box-shadow: var(--shadow-lg);
+            transform: scale(0.9) translateY(20px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.open .modal-card { transform: scale(1) translateY(0); }
+        .modal-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 24px; color: var(--color-1); text-align: center;}
+        
+        .modal-actions { display: flex; gap: 12px; margin-top: 28px; }
+
+        /* History Details Modal Inner Style */
+        .detail-section { margin-bottom: 15px; text-align: left;}
+        .detail-section h4 { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px;}
+        .detail-item { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px; color: var(--text-main); font-weight: 500;}
+        .detail-item .amt { color: var(--color-1); font-weight: 600;}
+        .detail-item.other .amt { color: var(--danger); }
+
+        /* Bottom Sheet */
+        .bottom-sheet-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.4); z-index: 90; backdrop-filter: blur(4px);
+            display: flex; align-items: flex-end; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .bottom-sheet-overlay.open { opacity: 1; pointer-events: auto; }
+        .bottom-sheet {
+            background: var(--surface); width: 100%; max-width: 450px;
+            border-top-left-radius: 30px; border-top-right-radius: 30px; padding: 30px 24px;
+            transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+        }
+        .bottom-sheet-overlay.open .bottom-sheet { transform: translateY(0); }
+        
+        .sheet-option {
+            display: flex; align-items: center; padding: 18px; border-radius: 16px;
+            margin-bottom: 12px; cursor: pointer; font-weight: 600; font-size: 1.05rem;
+            transition: all 0.2s; border: 2px solid transparent; background: var(--color-5);
+            color: var(--text-main);
+        }
+        .sheet-option:active { transform: scale(0.96); }
+        .sheet-option.done-opt { color: var(--success); background: #ecfdf5; }
+        .sheet-option.notfound-opt { color: var(--danger); background: #fef2f2; }
+        .sheet-option.note-opt { color: var(--color-1); background: var(--color-5); }
+        .sheet-option-icon { margin-right: 16px; font-size: 1.4rem; }
+
+        .empty-state {
+            text-align: center; color: var(--color-1);
+            padding: 80px 20px; font-size: 1rem; font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- App Container -->
+    <div class="app-container">
+        
+        <!-- Animated Sky Background Elements -->
+        <div class="live-bg-container">
+            <div class="cloud cloud-1"></div>
+            <div class="cloud cloud-2"></div>
+            <div class="cloud cloud-3"></div>
+        </div>
+
+        <!-- Header -->
+        <header>
+            <h1>TripTracker Pro</h1>
+            <div class="sync-icon" id="syncIcon"></div>
+        </header>
+
+        <!-- Budget Progress -->
+        <div class="budget-wrapper" id="budgetBarWrapper">
+            <div class="budget-info">
+                <span class="spent">Spent: <strong id="spentLabel">Rs. 0</strong></span>
+                <span class="remaining">Balance: <strong id="remainingLabel">Rs. 0</strong></span>
+            </div>
+            <div class="progress-bg">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+        </div>
+
+        <!-- VIEW 1: Shopping List -->
+        <div class="content-view active" id="view-list">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; position: relative; z-index: 2;">
+                <h3 style="font-size:1.2rem; font-weight:700; color:var(--color-1); text-shadow: 0 1px 2px rgba(255,255,255,0.8);">Purchase List</h3>
+                <span id="undoBtn" style="font-size:0.9rem; color:var(--color-1); font-weight:600; cursor:pointer; display:none; background:rgba(255,255,255,0.8); padding:6px 12px; border-radius:20px; box-shadow: var(--shadow-sm);">↩ Undo</span>
+            </div>
+            
+            <div id="shoppingListContainer" style="position: relative; z-index: 2;">
+                <!-- Items injected here -->
+            </div>
+        </div>
+
+        <!-- VIEW 2: Expenses History -->
+        <div class="content-view" id="view-expenses">
+            <h3 style="font-size:1.2rem; font-weight:700; margin-bottom:24px; color:var(--color-1); text-shadow: 0 1px 2px rgba(255,255,255,0.8); position: relative; z-index: 2;">Trip History</h3>
+            
+            <div id="expensesHistoryContainer" style="position: relative; z-index: 2;">
+                <!-- Cards injected here -->
+            </div>
+        </div>
+
+        <!-- Floating Add Item Bubble (+) - Now always visible in List View -->
+        <div class="fab-add" id="fabAdd" onclick="openModal('addItemModal')" style="display: flex;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </div>
+
+        <!-- Navigation Footer -->
+        <footer>
+            <div class="nav-tab active" onclick="switchView('list')">
+                <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+                <span>Items</span>
+            </div>
+
+            <div class="center-btn-wrapper">
+                <div class="center-action-btn" id="centerActionBtn">
+                    <span id="centerBtnText">START</span>
+                    <svg id="centerBtnSvg" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                </div>
+            </div>
+
+            <div class="nav-tab" onclick="switchView('expenses')">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z"/></svg>
+                <span>History</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- MODALS -->
+    
+    <!-- Add Item Modal -->
+    <div class="modal-overlay" id="addItemModal">
+        <div class="modal-card">
+            <div class="modal-title">New Item</div>
+            <div class="form-group">
+                <label>Item Name</label>
+                <input type="text" id="newItemInput" class="form-control" placeholder="e.g. Printer Ink, Display...">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('addItemModal')">Cancel</button>
+                <button class="btn" onclick="submitNewItem()">Add to List</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Trip Modal -->
+    <div class="modal-overlay" id="startModal">
+        <div class="modal-card">
+            <div class="modal-title">Start Trip</div>
+            <div class="form-group">
+                <label>Enter Total Amount</label>
+                <input type="number" id="initialBudgetInput" class="form-control" placeholder="Total Amount">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('startModal')">Cancel</button>
+                <button class="btn" onclick="submitStartTrip()">Begin Trip</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Modal (Items & Custom) -->
+    <div class="modal-overlay" id="expenseModal">
+        <div class="modal-card">
+            <div class="modal-title" id="expenseModalTitle">Add Expense</div>
+            <div class="form-group" id="expenseReasonGroup" style="display:none;">
+                <label>Reason</label>
+                <input type="text" id="expenseReasonInput" class="form-control" placeholder="e.g. Tuk Tuk, Lunch...">
+            </div>
+            <div class="form-group">
+                <label>Amount Spent</label>
+                <input type="number" id="expenseAmountInput" class="form-control" placeholder="Rs.">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('expenseModal')">Cancel</button>
+                <button class="btn" onclick="submitExpense()">Confirm Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Modal -->
+    <div class="modal-overlay" id="noteModal">
+        <div class="modal-card">
+            <div class="modal-title">Add Note</div>
+            <div class="form-group">
+                <label>Remarks</label>
+                <input type="text" id="noteTextInput" class="form-control" placeholder="Shop name, availability...">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('noteModal')">Cancel</button>
+                <button class="btn" onclick="submitItemNote()">Save Note</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal (Professional Replacement for Browser Alerts) -->
+    <div class="modal-overlay" id="systemAlertModal">
+        <div class="modal-card" style="text-align: center;">
+            <div class="modal-title" id="alertTitle" style="margin-bottom: 12px;">Alert</div>
+            <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom: 24px;" id="alertMessage">Message</p>
+            <div class="modal-actions" id="alertActions" style="margin-top: 0;">
+                <!-- Buttons injected dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- History Details Modal -->
+    <div class="modal-overlay" id="historyDetailModal">
+        <div class="modal-card">
+            <div class="modal-title" id="historyDetailTitle" style="margin-bottom: 12px;">Trip Details</div>
+            <div id="historyDetailContent" style="max-height: 50vh; overflow-y: auto; padding-right: 5px;">
+                <!-- Details injected here -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal('historyDetailModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Sheet Options -->
+    <div class="bottom-sheet-overlay" id="itemActionSheet" onclick="closeBottomSheet(event)">
+        <div class="bottom-sheet">
+            <div id="sheetItemTitle" style="font-weight:700; margin-bottom:24px; font-size:1.2rem; color:var(--color-1); text-align: center;">Item Name</div>
+            
+            <div class="sheet-option done-opt" onclick="handleSheetAction('done')">
+                <span class="sheet-option-icon">✅</span>
+                <span>Mark as Purchased</span>
+            </div>
+            <div class="sheet-option notfound-opt" onclick="handleSheetAction('notfound')">
+                <span class="sheet-option-icon">❌</span>
+                <span>Item Not Found</span>
+            </div>
+            <div class="sheet-option note-opt" onclick="handleSheetAction('note')">
+                <span class="sheet-option-icon">📝</span>
+                <span>Add a Note</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* * ==========================================
+         * DEPLOYMENT CONFIGURATION
+         * Put your Google Apps Script Web App URL here
+         * ==========================================
+         */
+        const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYCrEDOV_W9ZoMPGOjF9u3qMvVeeqyKDV7Irkm0us1VaW2QjRTduEsUvdJa8EhQQam4A/exec";
+
+        // State Management
+        let appState = {
+            isTripStarted: false,
+            initialBudget: 0,
+            spent: 0,
+            shoppingList: [],
+            tripsHistory: [],
+            currentTripExpenses: [], // Tracks non-item expenses
+            lastAction: null
+        };
+
+        let activeItemId = null;
+        let isCustomExpense = false;
+        let longPressTimeout = null;
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            if(localStorage.getItem('colombo_pro_v4')) {
+                appState = JSON.parse(localStorage.getItem('colombo_pro_v4'));
+                // Migrate old state structure if missing currentTripExpenses
+                if(!appState.currentTripExpenses) appState.currentTripExpenses = [];
+            }
+            renderApp();
+            setupLongPress();
+        });
+
+        function saveState() {
+            localStorage.setItem('colombo_pro_v4', JSON.stringify(appState));
+            triggerSyncAnimation();
+        }
+
+        function triggerSyncAnimation() {
+            const syncIcon = document.getElementById('syncIcon');
+            syncIcon.className = 'sync-icon syncing';
+            setTimeout(() => {
+                syncIcon.className = 'sync-icon success';
+                setTimeout(() => syncIcon.className = 'sync-icon', 600);
+            }, 500);
+        }
+
+        function showCustomAlert(title, message, isConfirm, onConfirm) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMessage').innerText = message;
+            const actionsDiv = document.getElementById('alertActions');
+            actionsDiv.innerHTML = '';
+            
+            if(isConfirm) {
+                actionsDiv.innerHTML = `
+                    <button class="btn btn-outline" onclick="closeModal('systemAlertModal')">Cancel</button>
+                    <button class="btn" style="background:var(--danger)" id="confirmAlertBtn">End Trip</button>
+                `;
+                document.getElementById('confirmAlertBtn').onclick = () => {
+                    closeModal('systemAlertModal');
+                    if(onConfirm) onConfirm();
+                };
+            } else {
+                actionsDiv.innerHTML = `<button class="btn" onclick="closeModal('systemAlertModal')">Awesome</button>`;
+            }
+            openModal('systemAlertModal');
+        }
+
+        function renderApp() {
+            const barWrapper = document.getElementById('budgetBarWrapper');
+            
+            if (appState.isTripStarted) {
+                barWrapper.style.display = 'block';
+                
+                const remaining = appState.initialBudget - appState.spent;
+                document.getElementById('spentLabel').innerText = `Rs. ${appState.spent.toLocaleString()}`;
+                document.getElementById('remainingLabel').innerText = `Rs. ${remaining.toLocaleString()}`;
+                
+                const percent = Math.max(0, (remaining / appState.initialBudget) * 100);
+                document.getElementById('progressBar').style.width = `${percent}%`;
+                
+                document.getElementById('centerBtnText').style.display = 'none';
+                document.getElementById('centerBtnSvg').style.display = 'block';
+                document.getElementById('centerActionBtn').classList.add('active-state');
+            } else {
+                barWrapper.style.display = 'none';
+                document.getElementById('centerBtnText').style.display = 'block';
+                document.getElementById('centerBtnSvg').style.display = 'none';
+                document.getElementById('centerActionBtn').classList.remove('active-state');
+            }
+
+            const listContainer = document.getElementById('shoppingListContainer');
+            listContainer.innerHTML = '';
+            
+            const sortedList = [...appState.shoppingList].sort((a, b) => {
+                const weight = { 'pending': 1, 'not-found': 2, 'done': 3 };
+                return weight[a.status] - weight[b.status];
+            });
+
+            if(sortedList.length === 0) {
+                listContainer.innerHTML = `<div class="empty-state">Your list is empty.<br>Tap the <strong>+</strong> button to add items.</div>`;
+            }
+
+            sortedList.forEach(item => {
+                const row = document.createElement('div');
+                row.className = `item-row ${item.status === 'done' ? 'done' : ''} ${item.status === 'not-found' ? 'not-found' : ''}`;
+                row.onclick = () => openItemMenu(item.id);
+                
+                row.innerHTML = `
+                    <div class="item-details">
+                        <div class="item-title">${item.title}</div>
+                        ${item.note ? `<div class="item-note">📝 ${item.note}</div>` : ''}
+                    </div>
+                    ${item.price ? `<div class="item-price">Rs. ${item.price.toLocaleString()}</div>` : ''}
+                `;
+                listContainer.appendChild(row);
+            });
+
+            document.getElementById('undoBtn').style.display = appState.lastAction ? 'block' : 'none';
+
+            // Render History Cards
+            const historyContainer = document.getElementById('expensesHistoryContainer');
+            if(appState.tripsHistory.length === 0) {
+                historyContainer.innerHTML = '<div class="empty-state">No previous trips recorded.</div>';
+            } else {
+                historyContainer.innerHTML = '';
+                [...appState.tripsHistory].reverse().forEach((trip, index) => {
+                    // Reverse index mapping to original array
+                    const originalIndex = appState.tripsHistory.length - 1 - index;
+                    const bal = trip.budget - trip.spent;
+                    const card = document.createElement('div');
+                    card.className = 'history-card';
+                    card.onclick = () => showHistoryDetails(originalIndex);
+                    card.innerHTML = `
+                        <div class="history-header">
+                            <span>📅 ${trip.date}</span>
+                            <span class="click-hint">Tap for Info</span>
+                        </div>
+                        <div class="history-body">
+                            <div class="history-stat">
+                                <span>Total Budget</span>
+                                <span style="font-weight:600;">Rs. ${trip.budget.toLocaleString()}</span>
+                            </div>
+                            <div class="history-stat">
+                                <span>Total Spent</span>
+                                <span style="color:var(--danger); font-weight:600;">- Rs. ${trip.spent.toLocaleString()}</span>
+                            </div>
+                            <div class="history-stat">
+                                <span style="color:var(--color-1);">Final Balance</span>
+                                <span style="color:var(--success);">Rs. ${bal.toLocaleString()}</span>
+                            </div>
+                        </div>
+                    `;
+                    historyContainer.appendChild(card);
+                });
+            }
+        }
+
+        function switchView(view) {
+            document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById(`view-${view}`).classList.add('active');
+            document.querySelectorAll('.nav-tab')[view === 'list' ? 0 : 2].classList.add('active');
+            
+            // FAB is always visible in 'list' view to allow prepping the list
+            document.getElementById('fabAdd').style.display = (view === 'list') ? 'flex' : 'none';
+        }
+
+        // Modals Logic
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        function submitNewItem() {
+            const input = document.getElementById('newItemInput');
+            if(!input.value.trim()) return;
+            appState.shoppingList.push({
+                id: Date.now(), title: input.value.trim(), status: 'pending', note: '', price: 0
+            });
+            input.value = '';
+            closeModal('addItemModal');
+            saveState(); renderApp();
+        }
+
+        function submitStartTrip() {
+            const val = document.getElementById('initialBudgetInput').value;
+            if(!val || val <= 0) return;
+            appState.initialBudget = parseInt(val);
+            appState.spent = 0;
+            appState.currentTripExpenses = [];
+            appState.isTripStarted = true;
+            document.getElementById('initialBudgetInput').value = '';
+            closeModal('startModal');
+            saveState(); renderApp();
+            
+            showCustomAlert("Ready to Go!", "Trip started successfully. Let's start tracking your expenses.", false);
+        }
+
+        function openItemMenu(id) {
+            activeItemId = id;
+            const item = appState.shoppingList.find(i => i.id === id);
+            document.getElementById('sheetItemTitle').innerText = item.title;
+            document.getElementById('itemActionSheet').classList.add('open');
+        }
+        function closeBottomSheet(e) {
+            if(e ? e.target.classList.contains('bottom-sheet-overlay') : true) {
+                document.getElementById('itemActionSheet').classList.remove('open');
+            }
+        }
+
+        function handleSheetAction(action) {
+            closeBottomSheet();
+            const item = appState.shoppingList.find(i => i.id === activeItemId);
+            
+            if(action === 'done') {
+                isCustomExpense = false;
+                document.getElementById('expenseModalTitle').innerText = `Paid for ${item.title}`;
+                document.getElementById('expenseReasonGroup').style.display = 'none';
+                document.getElementById('expenseAmountInput').value = '';
+                openModal('expenseModal');
+            } else if(action === 'notfound') {
+                appState.lastAction = JSON.parse(JSON.stringify(appState));
+                item.status = 'not-found';
+                saveState(); renderApp();
+            } else if(action === 'note') {
+                document.getElementById('noteTextInput').value = item.note || '';
+                openModal('noteModal');
+            }
+        }
+
+        function submitExpense() {
+            const amount = parseInt(document.getElementById('expenseAmountInput').value);
+            if(!amount || amount <= 0) return;
+            
+            appState.lastAction = JSON.parse(JSON.stringify(appState));
+            appState.spent += amount;
+
+            if(!isCustomExpense) {
+                const item = appState.shoppingList.find(i => i.id === activeItemId);
+                item.status = 'done';
+                item.price = amount;
+            } else {
+                const reason = document.getElementById('expenseReasonInput').value || 'Other Expense';
+                appState.currentTripExpenses.push({ reason, amount });
+            }
+
+            closeModal('expenseModal');
+            saveState(); renderApp();
+        }
+
+        function submitItemNote() {
+            const noteText = document.getElementById('noteTextInput').value;
+            const item = appState.shoppingList.find(i => i.id === activeItemId);
+            item.note = noteText.trim();
+            closeModal('noteModal');
+            saveState(); renderApp();
+        }
+
+        document.getElementById('centerActionBtn').addEventListener('click', () => {
+            if(!appState.isTripStarted) {
+                openModal('startModal');
+            } else {
+                isCustomExpense = true;
+                document.getElementById('expenseModalTitle').innerText = 'Add Extra Expense';
+                document.getElementById('expenseReasonGroup').style.display = 'block';
+                document.getElementById('expenseReasonInput').value = '';
+                document.getElementById('expenseAmountInput').value = '';
+                openModal('expenseModal');
+            }
+        });
+
+        document.getElementById('undoBtn').addEventListener('click', () => {
+            if(appState.lastAction) {
+                appState = JSON.parse(JSON.stringify(appState.lastAction));
+                saveState(); renderApp();
+            }
+        });
+
+        function setupLongPress() {
+            const btn = document.getElementById('centerActionBtn');
+            btn.addEventListener('mousedown', startPress);
+            btn.addEventListener('touchstart', startPress);
+            btn.addEventListener('mouseup', cancelPress);
+            btn.addEventListener('mouseleave', cancelPress);
+            btn.addEventListener('touchend', cancelPress);
+        }
+
+        function startPress(e) {
+            if (!appState.isTripStarted) return;
+            longPressTimeout = setTimeout(() => {
+                showCustomAlert(
+                    "End Trip?", 
+                    "This will finalize your expenses and save the summary to your History.", 
+                    true, 
+                    endTrip
+                );
+            }, 1000); 
+        }
+
+        function cancelPress() { clearTimeout(longPressTimeout); }
+
+        function endTrip() {
+            const today = new Date().toISOString().split('T')[0];
+            const purchasedItems = appState.shoppingList.filter(i => i.status === 'done');
+            
+            const tripData = {
+                date: today,
+                budget: appState.initialBudget,
+                spent: appState.spent,
+                balance: appState.initialBudget - appState.spent,
+                purchasedItems: purchasedItems,
+                otherExpenses: appState.currentTripExpenses
+            };
+
+            appState.tripsHistory.push(tripData);
+            
+            if(GOOGLE_APPS_SCRIPT_URL !== "YOUR_DEPLOYED_WEB_APP_URL_HERE") {
+                fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(tripData)
+                }).catch(err => console.log("Sync Error", err));
+            }
+
+            appState.isTripStarted = false;
+            appState.lastAction = null;
+            appState.currentTripExpenses = [];
+            appState.shoppingList = appState.shoppingList.filter(i => i.status !== 'done');
+            
+            showCustomAlert("Trip Saved", `Awesome! Your trip is saved.\\nFinal Balance: Rs. ${tripData.balance.toLocaleString()}`, false);
+            
+            saveState(); renderApp();
+        }
+
+        function showHistoryDetails(index) {
+            const trip = appState.tripsHistory[index];
+            document.getElementById('historyDetailTitle').innerText = `Date: ${trip.date}`;
+            
+            let contentHTML = '';
+            
+            if(trip.purchasedItems && trip.purchasedItems.length > 0) {
+                contentHTML += `<div class="detail-section"><h4>Purchased Items</h4>`;
+                trip.purchasedItems.forEach(item => {
+                    contentHTML += `<div class="detail-item"><span>${item.title}</span> <span class="amt">Rs. ${item.price.toLocaleString()}</span></div>`;
+                });
+                contentHTML += `</div>`;
+            }
+
+            if(trip.otherExpenses && trip.otherExpenses.length > 0) {
+                contentHTML += `<div class="detail-section"><h4>Other Expenses</h4>`;
+                trip.otherExpenses.forEach(exp => {
+                    contentHTML += `<div class="detail-item other"><span>${exp.reason}</span> <span class="amt">- Rs. ${exp.amount.toLocaleString()}</span></div>`;
+                });
+                contentHTML += `</div>`;
+            }
+
+            if(!contentHTML) contentHTML = '<div style="color:var(--text-muted); font-size:0.9rem;">No detailed items saved for this trip.</div>';
+
+            document.getElementById('historyDetailContent').innerHTML = contentHTML;
+            openModal('historyDetailModal');
+        }
+
+    </script>
+</body>
+</html>

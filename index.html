@@ -3,1040 +3,773 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Colombo Trip Tracker</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>TripTracker Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --color-1: #0062cc;
-            --color-2: #009cda;
-            --color-3: #78d2f6;
-            --color-4: #c2ecfc;
-            --color-5: #eff9ff;
+            /* Premium Core Colors */
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #2563eb;
+            --accent-glow: rgba(37, 99, 235, 0.4);
             
-            --surface: #ffffff;
-            --text-main: #1e293b;
+            --surface: rgba(255, 255, 255, 0.85);
+            --surface-solid: #ffffff;
+            --text-main: #0f172a;
             --text-muted: #64748b;
             --danger: #ef4444;
             --success: #10b981;
-            --border: #e2e8f0;
+            --warning: #f59e0b;
+            --border: rgba(15, 23, 42, 0.08);
             
-            --shadow-sm: 0 2px 8px rgba(0, 98, 204, 0.08);
-            --shadow-md: 0 8px 16px rgba(0, 98, 204, 0.12);
-            --shadow-lg: 0 16px 32px rgba(0, 98, 204, 0.15);
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+            --shadow-lg: 0 24px 48px rgba(15, 23, 42, 0.12);
+            --radius-md: 16px;
+            --radius-lg: 24px;
         }
 
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
+            margin: 0; padding: 0;
+            font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: #e2e8f0;
+            background-color: #f8fafc;
             color: var(--text-main);
             overflow: hidden;
-            /* FIX 2: Height fix for mobile browsers (Safari/Chrome bottom bars) */
-            height: 100vh;
-            height: -webkit-fill-available;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            height: 100dvh;
+            display: flex; justify-content: center; align-items: center;
         }
 
-        /* LIVE ANIMATED SKY BACKGROUND */
-        .live-bg-container {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(180deg, var(--color-3) 0%, var(--color-5) 100%);
-            overflow: hidden;
-            z-index: 0;
+        /* PREMIUM DYNAMIC MESH BACKGROUND (Subtle & Professional) */
+        .mesh-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; overflow: hidden;
+            background-color: #f8fafc;
+            transition: background-color 2s ease;
+        }
+        
+        .mesh-blob {
+            position: absolute; filter: blur(80px); opacity: 0.6;
+            border-radius: 50%; animation: floatBg 20s infinite alternate ease-in-out;
+            transition: background 2s ease;
+        }
+        .blob-1 { width: 300px; height: 300px; top: -100px; left: -100px; }
+        .blob-2 { width: 400px; height: 400px; bottom: -150px; right: -100px; animation-delay: -5s; }
+
+        @keyframes floatBg {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 80px) scale(1.1); }
         }
 
-        .cloud {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 50px;
-            filter: blur(1px);
-            animation: floatCloud linear infinite;
-        }
-
-        .cloud::before, .cloud::after {
-            content: '';
-            position: absolute;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 50%;
-        }
-
-        .cloud-1 { width: 120px; height: 35px; top: 15%; left: -150px; animation-duration: 35s; opacity: 0.8;}
-        .cloud-1::before { width: 60px; height: 60px; top: -25px; left: 15px; }
-        .cloud-1::after { width: 50px; height: 50px; top: -15px; left: 55px; }
-
-        .cloud-2 { width: 90px; height: 25px; top: 40%; left: -100px; animation-duration: 25s; opacity: 0.6; transform: scale(0.8);}
-        .cloud-2::before { width: 45px; height: 45px; top: -20px; left: 10px; }
-        .cloud-2::after { width: 35px; height: 35px; top: -10px; left: 40px; }
-
-        .cloud-3 { width: 150px; height: 45px; top: 65%; left: -200px; animation-duration: 45s; opacity: 0.7; transform: scale(1.2);}
-        .cloud-3::before { width: 75px; height: 75px; top: -35px; left: 20px; }
-        .cloud-3::after { width: 60px; height: 60px; top: -20px; left: 70px; }
-
-        @keyframes floatCloud {
-            0% { transform: translateX(-10vw); }
-            100% { transform: translateX(120vw); }
-        }
+        /* Time of Day Themes */
+        .theme-morning .blob-1 { background: #bae6fd; } /* Light Blue */
+        .theme-morning .blob-2 { background: #e0f2fe; }
+        
+        .theme-noon .blob-1 { background: #bfdbfe; } /* Blue */
+        .theme-noon .blob-2 { background: #93c5fd; }
+        
+        .theme-evening .blob-1 { background: #fed7aa; } /* Peach/Orange */
+        .theme-evening .blob-2 { background: #ffedd5; }
+        
+        .theme-night { background-color: #0f172a; } /* Dark */
+        .theme-night .blob-1 { background: #1e293b; opacity: 0.8; filter: blur(100px); }
+        .theme-night .blob-2 { background: #334155; opacity: 0.8; filter: blur(100px); }
 
         /* App Container */
         .app-container {
-            width: 100%;
-            max-width: 450px;
-            /* FIX 3: Container height fix */
-            height: 100vh;
-            height: -webkit-fill-available;
+            width: 100%; max-width: 420px; height: 100dvh;
             background: transparent;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            z-index: 1;
-            box-shadow: 0 0 40px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column;
+            position: relative; z-index: 10;
+            box-shadow: 0 0 50px rgba(0,0,0,0.05);
         }
 
-        /* Header */
+        /* Glass Header */
         header {
-            padding: 24px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 24px 24px 16px 24px;
+            display: flex; justify-content: space-between; align-items: center;
             background: transparent;
-            z-index: 10;
+            z-index: 20;
         }
+        header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.5px; color: var(--primary); transition: color 0.3s; }
+        .theme-night header h1 { color: #f8fafc; }
 
-        header h1 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--color-1);
-            letter-spacing: -0.5px;
-            text-shadow: 0 2px 4px rgba(255,255,255,0.8);
-        }
-
-        /* Sync Badge UI */
         .sync-badge {
             display: flex; align-items: center; gap: 6px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 6px 12px; border-radius: 20px;
-            font-size: 0.8rem; font-weight: 600; color: var(--color-1);
-            cursor: pointer; box-shadow: var(--shadow-sm);
-            transition: all 0.3s ease;
-            backdrop-filter: blur(4px);
+            background: var(--surface); backdrop-filter: blur(12px);
+            padding: 8px 14px; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 600; color: var(--primary);
+            cursor: pointer; border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm); transition: all 0.2s;
         }
+        .theme-night .sync-badge { background: rgba(30,41,59,0.7); color: #fff; border-color: rgba(255,255,255,0.1); }
         .sync-badge:active { transform: scale(0.95); }
-        .sync-badge.syncing #syncIconSvg { animation: spin 1s linear infinite; }
-        .sync-badge.done { background: var(--success); color: white; }
-        .sync-badge.done #syncIconSvg { stroke: white; }
-        .sync-badge.error { background: var(--danger); color: white; }
-        .sync-badge.error #syncIconSvg { stroke: white; }
+        .sync-badge.syncing svg { animation: spin 1s linear infinite; }
+        .sync-badge.done { background: var(--success); color: white; border-color: var(--success); }
+        .sync-badge.error { background: var(--danger); color: white; border-color: var(--danger); }
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* Budget Progress */
+        /* Budget Card (Premium Look) */
         .budget-wrapper {
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            display: none;
-            animation: slideDown 0.4s ease forwards;
-            border-radius: 16px;
-            margin: 0 16px 12px 16px;
-            box-shadow: var(--shadow-sm);
+            padding: 20px 24px; background: var(--surface); backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg); margin: 0 20px 16px 20px; display: none;
+            box-shadow: var(--shadow-md); border: 1px solid var(--border);
+            animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .theme-night .budget-wrapper { background: rgba(30,41,59,0.7); border-color: rgba(255,255,255,0.05); }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .budget-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            margin-bottom: 8px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-        .budget-info .spent { color: var(--text-main); font-weight: 600; }
-        .budget-info .remaining { color: var(--color-1); font-weight: 700; }
+        .budget-header { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 4px; }
+        .theme-night .budget-header { color: #94a3b8; }
+        .budget-amount { font-size: 1.75rem; font-weight: 700; color: var(--primary); margin-bottom: 16px; letter-spacing: -0.5px; }
+        .theme-night .budget-amount { color: #fff; }
+        
+        .budget-stats { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 8px; font-weight: 500; }
+        .budget-stats .spent { color: var(--text-muted); }
+        .theme-night .budget-stats .spent { color: #94a3b8; }
+        .budget-stats .remaining { color: var(--accent); font-weight: 600; }
+        
+        .progress-bg { width: 100%; height: 6px; background: rgba(15,23,42,0.05); border-radius: 6px; overflow: hidden; }
+        .theme-night .progress-bg { background: rgba(255,255,255,0.1); }
+        .progress-fill { height: 100%; width: 0%; background: var(--accent); border-radius: 6px; transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
 
-        .progress-bg {
-            width: 100%; height: 8px;
-            background: var(--color-4);
-            border-radius: 8px; overflow: hidden;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .progress-fill {
-            height: 100%; width: 0%;
-            background: linear-gradient(90deg, var(--color-2), var(--color-1));
-            border-radius: 8px; 
-            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        /* Main Content */
+        /* Main Content Views */
         .content-view {
-            flex: 1; 
-            overflow-y: auto;
-            /* FIX 4: Padding bottom increased so list doesn't hide behind footer */
-            padding: 10px 20px 110px 20px;
-            display: none;
+            flex: 1; overflow-y: auto; padding: 10px 20px 120px 20px; display: none;
+            /* Scrollbar hidden */
+            -ms-overflow-style: none; scrollbar-width: none;
         }
-        .content-view.active {
-            display: block; animation: fadeIn 0.4s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .content-view::-webkit-scrollbar { display: none; }
+        .content-view.active { display: block; animation: fadeScale 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        /* Floating Add Bubble */
-        .fab-add {
-            position: absolute;
-            /* FIX 5: FAB position adjusted for mobile footer */
-            bottom: 95px; right: 20px;
-            width: 56px; height: 56px;
-            background: linear-gradient(135deg, var(--color-2), var(--color-1));
-            color: white; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 24px; font-weight: 300;
-            box-shadow: 0 8px 20px rgba(0, 98, 204, 0.4);
-            cursor: pointer; z-index: 15;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .fab-add:active { transform: scale(0.85); }
-        
-        /* Item Rows */
+        .section-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .theme-night .section-title { color: #fff; }
+        .undo-btn { font-size: 0.75rem; color: var(--accent); font-weight: 600; cursor: pointer; padding: 6px 12px; background: rgba(37,99,235,0.1); border-radius: 20px; display: none; transition: 0.2s;}
+        .undo-btn:active { transform: scale(0.95); }
+
+        /* Modern List Items */
         .item-row {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(5px);
-            padding: 16px; border-radius: 14px;
-            margin-bottom: 12px;
-            box-shadow: var(--shadow-sm);
+            background: var(--surface-solid);
+            padding: 18px 20px; border-radius: var(--radius-md); margin-bottom: 12px;
             display: flex; justify-content: space-between; align-items: center;
+            box-shadow: var(--shadow-sm); border: 1px solid var(--border);
             cursor: pointer; transition: all 0.2s ease;
-            border: 1px solid rgba(255,255,255,0.5);
         }
-        .item-row:active { transform: scale(0.97); }
-        .item-row.done { 
-            opacity: 0.7; background: rgba(248, 250, 252, 0.9);
-            border-left: 4px solid var(--success);
-        }
+        .theme-night .item-row { background: #1e293b; border-color: rgba(255,255,255,0.05); }
+        .item-row:active { transform: scale(0.98); box-shadow: none; }
+        
+        .item-row.done { opacity: 0.6; border-left: 4px solid var(--success); }
         .item-row.done .item-title { text-decoration: line-through; color: var(--text-muted); }
-        .item-row.not-found { 
-            border-left: 4px solid var(--danger); 
-            background: rgba(254, 242, 242, 0.9); 
-        }
+        .item-row.not-found { border-left: 4px solid var(--danger); background: #fef2f2; }
+        .theme-night .item-row.not-found { background: rgba(239, 68, 68, 0.1); }
         
+        .item-info { display: flex; flex-direction: column; gap: 4px; }
         .item-title { font-weight: 600; font-size: 0.95rem; color: var(--text-main); }
-        .item-note { font-size: 0.75rem; color: var(--color-2); margin-top: 4px; font-weight: 500; }
-        .item-price { font-weight: 700; color: var(--color-1); font-size: 1rem; }
+        .theme-night .item-title { color: #fff; }
+        .item-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+        .theme-night .item-meta { color: #94a3b8; }
+        .item-price { font-weight: 700; color: var(--primary); font-size: 1rem; }
+        .theme-night .item-price { color: #fff; }
 
-        /* History Table */
-        .history-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(5px);
-            border-radius: 14px;
-            overflow: hidden;
-            box-shadow: var(--shadow-md);
-            margin-bottom: 16px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .history-card:active { transform: scale(0.98); }
-        .history-header {
-            background: var(--color-1);
-            color: white; padding: 14px;
-            font-weight: 600; font-size: 0.9rem;
-            display: flex; justify-content: space-between;
-            align-items: center;
-        }
-        .history-header .click-hint {
-            font-size: 0.7rem; font-weight: 400; background: rgba(255,255,255,0.2);
-            padding: 3px 6px; border-radius: 10px;
-        }
-        .history-body { padding: 14px; }
-        .history-stat {
-            display: flex; justify-content: space-between;
-            margin-bottom: 8px; font-size: 0.85rem;
-        }
-        .history-stat:last-child { margin-bottom: 0; padding-top: 8px; border-top: 1px dashed var(--border); font-weight: 600; }
-        .history-stat span:first-child { color: var(--text-muted); }
-
-        /* Forms & Buttons */
-        .form-group { margin-bottom: 16px; text-align: left; }
-        .form-group label {
-            display: block; font-size: 0.8rem; color: var(--color-1);
-            margin-bottom: 6px; font-weight: 600;
-        }
-        .form-control {
-            width: 100%; padding: 14px;
-            background: var(--color-5); border: 2px solid var(--color-4);
-            border-radius: 10px; color: var(--text-main);
-            font-size: 0.95rem; outline: none; transition: all 0.3s;
-            font-weight: 500;
-        }
-        .form-control:focus { border-color: var(--color-2); background: #fff; box-shadow: 0 0 0 4px rgba(0, 156, 218, 0.1); }
-        
-        .btn {
-            width: 100%; padding: 14px;
-            background: var(--color-1); color: white;
-            border: none; border-radius: 10px;
-            font-weight: 600; font-size: 0.95rem; letter-spacing: 0.5px;
-            cursor: pointer; transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(0, 98, 204, 0.2);
-        }
-        .btn:active { transform: scale(0.96); background: var(--color-1); }
-        .btn-outline {
-            background: transparent; color: var(--text-muted);
-            border: 2px solid var(--border); box-shadow: none;
-        }
-
-        /* FIX 6: Footer Navigation strictly anchored to bottom */
-        footer {
-            position: absolute; bottom: 0; left: 0;
-            width: 100%; 
-            height: 75px;
-            /* Safe area for iPhones with home indicator */
-            padding-bottom: env(safe-area-inset-bottom);
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
-            border-top: 1px solid rgba(0,0,0,0.05);
-            display: flex; justify-content: space-around; align-items: center;
-            z-index: 20; 
-        }
-        .nav-tab {
-            display: flex; flex-direction: column; align-items: center;
-            color: var(--text-muted); cursor: pointer;
-            font-size: 0.7rem; font-weight: 600; transition: all 0.3s; width: 60px;
-            /* FIX 7: Margin bottom for centering in footer space */
-            margin-bottom: env(safe-area-inset-bottom);
-        }
-        .nav-tab.active { color: var(--color-1); transform: translateY(-2px); }
-        .nav-tab svg { width: 24px; height: 24px; margin-bottom: 2px; fill: currentColor; }
-
-        /* Center Action Button */
-        .center-btn-wrapper {
-            position: relative; width: 65px; height: 65px;
-            /* Elevated position */
-            transform: translateY(calc(-20px - env(safe-area-inset-bottom)));
-        }
-        .center-action-btn {
-            width: 100%; height: 100%;
-            background: var(--surface);
+        /* Floating Action Button (FAB) */
+        .fab-add {
+            position: absolute; bottom: 100px; right: 24px;
+            width: 56px; height: 56px; background: var(--primary); color: white;
             border-radius: 50%; display: flex; justify-content: center; align-items: center;
-            color: var(--color-1); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 4px solid var(--color-5); user-select: none;
-            flex-direction: column;
+            font-size: 24px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.3); z-index: 20;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer;
         }
-        .center-action-btn:active { transform: scale(0.9); }
-        .center-action-btn.active-state {
-            background: linear-gradient(135deg, var(--color-2), var(--color-1));
-            color: white; border-color: white;
-            box-shadow: 0 8px 24px rgba(0, 98, 204, 0.3);
-        }
-        .center-action-btn span { font-weight: 700; font-size: 0.75rem; letter-spacing: 0.5px; }
-        .center-action-btn svg { width: 28px; height: 28px; display: none; fill: white; }
+        .theme-night .fab-add { background: var(--accent); box-shadow: 0 8px 24px var(--accent-glow); }
+        .fab-add:active { transform: scale(0.9); }
 
-        /* Custom Modals */
+        /* Sleek Footer Navigation */
+        footer {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 80px;
+            background: var(--surface); backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 30; padding-bottom: env(safe-area-inset-bottom);
+        }
+        .theme-night footer { background: rgba(15,23,42,0.85); border-color: rgba(255,255,255,0.05); }
+        
+        .nav-tab {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--text-muted); font-size: 0.7rem; font-weight: 600; width: 70px; height: 100%;
+            transition: color 0.3s; cursor: pointer;
+        }
+        .theme-night .nav-tab { color: #64748b; }
+        .nav-tab.active { color: var(--primary); }
+        .theme-night .nav-tab.active { color: #fff; }
+        .nav-tab svg { width: 22px; height: 22px; margin-bottom: 4px; fill: currentColor; transition: transform 0.3s; }
+        .nav-tab.active svg { transform: translateY(-2px); }
+
+        /* Center Action Button (Start/Custom Expense) */
+        .center-btn-wrapper { position: relative; width: 64px; height: 64px; transform: translateY(-24px); }
+        .center-action-btn {
+            width: 100%; height: 100%; background: var(--surface-solid);
+            border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: var(--primary); box-shadow: var(--shadow-md);
+            border: 1px solid var(--border); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer;
+        }
+        .theme-night .center-action-btn { background: #1e293b; color: #fff; border-color: rgba(255,255,255,0.1); }
+        .center-action-btn:active { transform: scale(0.9); }
+        .center-action-btn.active-state { background: var(--primary); color: #fff; border-color: transparent; }
+        .theme-night .center-action-btn.active-state { background: var(--accent); }
+        .center-action-btn span { font-weight: 700; font-size: 0.75rem; letter-spacing: 0.5px; }
+        .center-action-btn svg { width: 24px; height: 24px; display: none; fill: white; }
+
+        /* --- PREMIUM MODALS & POPUPS --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(8px);
-            z-index: 100; display: flex; justify-content: center; align-items: center;
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); z-index: 100;
+            display: flex; justify-content: center; align-items: center;
             opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
         .modal-overlay.open { opacity: 1; pointer-events: auto; }
-        .modal-card {
-            background: var(--surface); width: 90%; max-width: 340px;
-            border-radius: 20px; padding: 24px; box-shadow: var(--shadow-lg);
-            transform: scale(0.9) translateY(20px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .modal-overlay.open .modal-card { transform: scale(1) translateY(0); }
-        .modal-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; color: var(--color-1); text-align: center;}
         
-        .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
-
-        /* History Details Modal Inner Style */
-        .detail-section { margin-bottom: 12px; text-align: left;}
-        .detail-section h4 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; border-bottom: 1px solid var(--border); padding-bottom: 4px;}
-        .detail-item { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; color: var(--text-main); font-weight: 500;}
-        .detail-item .amt { color: var(--color-1); font-weight: 600;}
-        .detail-item.other .amt { color: var(--danger); }
-
-        /* Bottom Sheet */
-        .bottom-sheet-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.4); z-index: 90; backdrop-filter: blur(4px);
-            display: flex; align-items: flex-end; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        /* Center Modal */
+        .modal-card {
+            background: var(--surface-solid); width: 90%; max-width: 340px; 
+            border-radius: var(--radius-lg); padding: 24px;
+            transform: scale(0.95) translateY(10px); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: var(--shadow-lg); border: 1px solid var(--border);
         }
-        .bottom-sheet-overlay.open { opacity: 1; pointer-events: auto; }
+        .theme-night .modal-card { background: #1e293b; border-color: rgba(255,255,255,0.1); }
+        .modal-overlay.open .modal-card { transform: scale(1) translateY(0); }
+        
+        .modal-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 20px; color: var(--primary); text-align: center; }
+        .theme-night .modal-title { color: #fff; }
+        .modal-message { font-size: 0.9rem; color: var(--text-muted); text-align: center; margin-bottom: 24px; line-height: 1.5; }
+        .theme-night .modal-message { color: #94a3b8; }
+        
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+        .theme-night .form-label { color: #94a3b8; }
+        .form-control { 
+            width: 100%; padding: 14px 16px; background: #f8fafc; 
+            border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1rem; color: var(--text-main);
+            outline: none; transition: all 0.2s; font-weight: 500;
+        }
+        .theme-night .form-control { background: #0f172a; border-color: rgba(255,255,255,0.1); color: #fff; }
+        .form-control:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); background: var(--surface-solid); }
+        .theme-night .form-control:focus { background: #0f172a; }
+        
+        .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+        .btn { 
+            flex: 1; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; 
+            border: none; cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn-primary { background: var(--primary); color: white; }
+        .theme-night .btn-primary { background: var(--accent); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline { background: transparent; color: var(--text-main); border: 1px solid #e2e8f0; }
+        .theme-night .btn-outline { color: #fff; border-color: rgba(255,255,255,0.1); }
+
+        /* Bottom Sheet Modal */
         .bottom-sheet {
-            background: var(--surface); width: 100%; max-width: 450px;
-            border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 24px 20px;
-            transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            position: absolute; bottom: 0; background: var(--surface-solid); width: 100%; max-width: 450px;
+            border-radius: 24px 24px 0 0; padding: 24px; transform: translateY(100%); 
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
         }
-        .bottom-sheet-overlay.open .bottom-sheet { transform: translateY(0); }
+        .theme-night .bottom-sheet { background: #1e293b; border-top: 1px solid rgba(255,255,255,0.05); }
+        .modal-overlay.open .bottom-sheet { transform: translateY(0); }
         
-        .sheet-option {
-            display: flex; align-items: center; padding: 16px; border-radius: 14px;
-            margin-bottom: 10px; cursor: pointer; font-weight: 600; font-size: 0.95rem;
-            transition: all 0.2s; border: 2px solid transparent; background: var(--color-5);
-            color: var(--text-main);
+        .sheet-opt { 
+            padding: 16px; border-radius: 14px; margin-bottom: 12px; font-weight: 600; font-size: 0.95rem;
+            display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.2s;
+            border: 1px solid transparent; background: #f8fafc; color: var(--text-main);
         }
-        .sheet-option:active { transform: scale(0.96); }
-        .sheet-option.done-opt { color: var(--success); background: #ecfdf5; }
-        .sheet-option.notfound-opt { color: var(--danger); background: #fef2f2; }
-        .sheet-option.note-opt { color: var(--color-1); background: var(--color-5); }
-        .sheet-option-icon { margin-right: 14px; font-size: 1.2rem; }
+        .theme-night .sheet-opt { background: #0f172a; color: #fff; border-color: rgba(255,255,255,0.05); }
+        .sheet-opt:active { transform: scale(0.98); }
+        .sheet-opt.opt-done { color: var(--success); background: #ecfdf5; border-color: #d1fae5; }
+        .theme-night .sheet-opt.opt-done { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); }
+        .sheet-opt.opt-fail { color: var(--danger); background: #fef2f2; border-color: #fee2e2; }
+        .theme-night .sheet-opt.opt-fail { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
+        
+        /* Custom Toast Notification */
+        .toast-container {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            background: var(--surface-solid); color: var(--primary); font-weight: 600; font-size: 0.9rem;
+            padding: 12px 24px; border-radius: 30px; box-shadow: var(--shadow-md);
+            display: flex; align-items: center; gap: 8px; z-index: 200; border: 1px solid var(--border);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; opacity: 0;
+        }
+        .theme-night .toast-container { background: #1e293b; color: #fff; border-color: rgba(255,255,255,0.1); }
+        .toast-container.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast-icon { width: 18px; height: 18px; }
+        .toast-success .toast-icon { color: var(--success); }
+        .toast-warning .toast-icon { color: var(--warning); }
+        .toast-error .toast-icon { color: var(--danger); }
 
-        .empty-state {
-            text-align: center; color: var(--color-1);
-            padding: 60px 20px; font-size: 0.95rem; font-weight: 500;
-        }
+        .empty-state { text-align: center; color: var(--text-muted); padding: 60px 20px; font-size: 0.95rem; font-weight: 500; }
+        .theme-night .empty-state { color: #64748b; }
     </style>
 </head>
 <body>
 
+    <!-- Professional Dynamic Mesh Background -->
+    <div class="mesh-bg" id="dynamicBg">
+        <div class="mesh-blob blob-1"></div>
+        <div class="mesh-blob blob-2"></div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toast">
+        <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path id="toastIconPath" d=""/></svg>
+        <span id="toastMsg">Notification</span>
+    </div>
+
+    <!-- App Container -->
     <div class="app-container">
         
-        <div class="live-bg-container">
-            <div class="cloud cloud-1"></div>
-            <div class="cloud cloud-2"></div>
-            <div class="cloud cloud-3"></div>
-        </div>
-
+        <!-- Header -->
         <header>
             <h1>TripTracker Pro</h1>
-            <div class="sync-badge" id="syncBadge" onclick="syncWithCloud(false)">
-                <svg id="syncIconSvg" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
-                </svg>
+            <div class="sync-badge" id="syncBadge" onclick="syncWithCloud()">
+                <svg id="syncIconSvg" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
                 <span id="syncText">Sync</span>
             </div>
         </header>
 
-        <div class="budget-wrapper" id="budgetBarWrapper">
-            <div class="budget-info">
-                <span class="spent">Spent: <strong id="spentLabel">Rs. 0</strong></span>
-                <span class="remaining">Balance: <strong id="remainingLabel">Rs. 0</strong></span>
+        <!-- Premium Budget Card -->
+        <div class="budget-wrapper" id="budgetBar">
+            <div class="budget-header">Available Balance</div>
+            <div class="budget-amount" id="remLbl">Rs. 0</div>
+            <div class="budget-stats">
+                <span class="spent">Spent: <span id="spentLbl">Rs. 0</span></span>
+                <span class="spent">Total: <span id="totalLbl">Rs. 0</span></span>
             </div>
-            <div class="progress-bg">
-                <div class="progress-fill" id="progressBar"></div>
-            </div>
+            <div class="progress-bg"><div class="progress-fill" id="progFill"></div></div>
         </div>
 
+        <!-- VIEW: List -->
         <div class="content-view active" id="view-list">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; position: relative; z-index: 2;">
-                <h3 style="font-size:1.1rem; font-weight:700; color:var(--color-1); text-shadow: 0 1px 2px rgba(255,255,255,0.8);">Purchase List</h3>
-                <span id="undoBtn" style="font-size:0.8rem; color:var(--color-1); font-weight:600; cursor:pointer; display:none; background:rgba(255,255,255,0.8); padding:6px 12px; border-radius:20px; box-shadow: var(--shadow-sm);">↩ Undo</span>
+            <div class="section-title">
+                <span>Purchase List</span>
+                <span class="undo-btn" id="undoBtn" onclick="undoAction()">↩ Undo</span>
             </div>
-            
-            <div id="shoppingListContainer" style="position: relative; z-index: 2;">
-                </div>
+            <div id="listContainer"></div>
         </div>
 
-        <div class="content-view" id="view-expenses">
-            <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:20px; color:var(--color-1); text-shadow: 0 1px 2px rgba(255,255,255,0.8);">Trip History</h3>
-            
-            <div id="expensesHistoryContainer" style="position: relative; z-index: 2;">
-                </div>
+        <!-- VIEW: History -->
+        <div class="content-view" id="view-history">
+            <div class="section-title">Trip History</div>
+            <div id="historyContainer"></div>
         </div>
 
-        <div class="fab-add" id="fabAdd" onclick="openModal('addItemModal')" style="display: flex;">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <!-- Floating Add Item Button -->
+        <div class="fab-add" id="fabAdd" onclick="openModal('addModal')">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </div>
 
+        <!-- Sleek Footer Navigation -->
         <footer>
-            <div class="nav-tab active" onclick="switchView('list')">
+            <div class="nav-tab active" onclick="switchTab('list')">
                 <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
                 <span>Items</span>
             </div>
-
+            
             <div class="center-btn-wrapper">
-                <div class="center-action-btn" id="centerActionBtn">
-                    <span id="centerBtnText">START</span>
-                    <svg id="centerBtnSvg" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                <div class="center-action-btn" id="mainBtn" onclick="handleMainAction()">
+                    <span id="mainBtnTxt">START</span>
+                    <svg id="mainBtnIco" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
                 </div>
             </div>
-
-            <div class="nav-tab" onclick="switchView('expenses')">
+            
+            <div class="nav-tab" onclick="switchTab('history')">
                 <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z"/></svg>
                 <span>History</span>
             </div>
         </footer>
     </div>
 
-    <div class="modal-overlay" id="addItemModal">
+    <!-- PREMIUM MODALS -->
+    
+    <!-- Add Item Modal -->
+    <div class="modal-overlay" id="addModal">
         <div class="modal-card">
-            <div class="modal-title">New Item</div>
+            <h3 class="modal-title">Add New Item</h3>
             <div class="form-group">
-                <label>Item Name</label>
-                <input type="text" id="newItemInput" class="form-control" placeholder="e.g. Printer Ink, Display...">
+                <label class="form-label">Item Name</label>
+                <input type="text" id="addInp" class="form-control" placeholder="e.g. Mobile Display, Cables...">
             </div>
             <div class="modal-actions">
-                <button class="btn btn-outline" onclick="closeModal('addItemModal')">Cancel</button>
-                <button class="btn" onclick="submitNewItem()">Add to List</button>
+                <button class="btn btn-outline" onclick="closeModal('addModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="addItem()">Add to List</button>
             </div>
         </div>
     </div>
 
+    <!-- Start Trip Modal -->
     <div class="modal-overlay" id="startModal">
         <div class="modal-card">
-            <div class="modal-title">Start Trip</div>
+            <h3 class="modal-title">Start Journey</h3>
             <div class="form-group">
-                <label>Enter Total Amount</label>
-                <input type="number" id="initialBudgetInput" class="form-control" placeholder="Total Amount">
+                <label class="form-label">Total Budget Available</label>
+                <input type="number" id="startInp" class="form-control" placeholder="Amount in Rs.">
             </div>
             <div class="modal-actions">
                 <button class="btn btn-outline" onclick="closeModal('startModal')">Cancel</button>
-                <button class="btn" onclick="submitStartTrip()">Begin Trip</button>
+                <button class="btn btn-primary" onclick="startTrip()">Begin Trip</button>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="expenseModal">
+    <!-- Add Expense Modal (For Items & Custom) -->
+    <div class="modal-overlay" id="expModal">
         <div class="modal-card">
-            <div class="modal-title" id="expenseModalTitle">Add Expense</div>
-            <div class="form-group" id="expenseReasonGroup" style="display:none;">
-                <label>Reason</label>
-                <input type="text" id="expenseReasonInput" class="form-control" placeholder="e.g. Tuk Tuk, Lunch...">
+            <h3 class="modal-title" id="expTitle">Log Expense</h3>
+            <div class="form-group" id="expRsnGroup" style="display:none;">
+                <label class="form-label">Expense Reason</label>
+                <input type="text" id="expRsn" class="form-control" placeholder="e.g. Tuk Tuk, Lunch...">
             </div>
             <div class="form-group">
-                <label>Amount Spent</label>
-                <input type="number" id="expenseAmountInput" class="form-control" placeholder="Rs.">
+                <label class="form-label">Amount Spent</label>
+                <input type="number" id="expAmt" class="form-control" placeholder="Amount in Rs.">
             </div>
             <div class="modal-actions">
-                <button class="btn btn-outline" onclick="closeModal('expenseModal')">Cancel</button>
-                <button class="btn" onclick="submitExpense()">Confirm Payment</button>
+                <button class="btn btn-outline" onclick="closeModal('expModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveExpense()">Confirm</button>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="noteModal">
+    <!-- Warning / Custom Alert Modal -->
+    <div class="modal-overlay" id="alertModal">
         <div class="modal-card">
-            <div class="modal-title">Add Note</div>
-            <div class="form-group">
-                <label>Remarks</label>
-                <input type="text" id="noteTextInput" class="form-control" placeholder="Shop name, availability...">
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-outline" onclick="closeModal('noteModal')">Cancel</button>
-                <button class="btn" onclick="submitItemNote()">Save Note</button>
+            <h3 class="modal-title" id="alertTitle">Alert</h3>
+            <p class="modal-message" id="alertMsg">Message goes here.</p>
+            <div class="modal-actions" id="alertActions">
+                <!-- Injected dynamically -->
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="systemAlertModal">
-        <div class="modal-card" style="text-align: center;">
-            <div class="modal-title" id="alertTitle" style="margin-bottom: 12px;">Alert</div>
-            <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.5; margin-bottom: 20px;" id="alertMessage">Message</p>
-            <div class="modal-actions" id="alertActions" style="margin-top: 0;">
-                </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="historyDetailModal">
-        <div class="modal-card">
-            <div class="modal-title" id="historyDetailTitle" style="margin-bottom: 10px;">Trip Details</div>
-            <div id="historyDetailContent" style="max-height: 50vh; overflow-y: auto; padding-right: 5px;">
-                </div>
-            <div class="modal-actions">
-                <button class="btn" onclick="closeModal('historyDetailModal')">Close</button>
+    <!-- Bottom Sheet Item Options -->
+    <div class="modal-overlay" id="sheetModal" onclick="closeModal('sheetModal')">
+        <div class="bottom-sheet" onclick="event.stopPropagation()">
+            <h3 class="modal-title" id="sheetTitle" style="margin-bottom:24px;">Item Options</h3>
+            <div class="sheet-opt opt-done" onclick="handleItemAction('done')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Mark as Purchased
             </div>
-        </div>
-    </div>
-
-    <div class="bottom-sheet-overlay" id="itemActionSheet" onclick="closeBottomSheet(event)">
-        <div class="bottom-sheet">
-            <div id="sheetItemTitle" style="font-weight:700; margin-bottom:20px; font-size:1.1rem; color:var(--color-1); text-align: center;">Item Name</div>
-            
-            <div class="sheet-option done-opt" onclick="handleSheetAction('done')">
-                <span class="sheet-option-icon">✅</span>
-                <span>Mark as Purchased</span>
+            <div class="sheet-opt opt-fail" onclick="handleItemAction('notfound')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                Mark Not Found
             </div>
-            <div class="sheet-option notfound-opt" onclick="handleSheetAction('notfound')">
-                <span class="sheet-option-icon">❌</span>
-                <span>Item Not Found</span>
-            </div>
-            <div class="sheet-option note-opt" onclick="handleSheetAction('note')">
-                <span class="sheet-option-icon">📝</span>
-                <span>Add a Note</span>
+            <div class="sheet-opt" onclick="closeModal('sheetModal')">
+                Cancel
             </div>
         </div>
     </div>
 
     <script>
-        /* ==========================================
-         * DEPLOYMENT CONFIGURATION
-         * Put your Google Apps Script Web App URL here
-         * ==========================================
-         */
-        const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYCrEDOV_W9ZoMPGOjF9u3qMvVeeqyKDV7Irkm0us1VaW2QjRTduEsUvdJa8EhQQam4A/exec";
+        /* =======================================================
+           GOOGLE APPS SCRIPT URL HERE
+           ======================================================= */
+        const APP_URL = "https://script.google.com/macros/s/AKfycbzYCrEDOV_W9ZoMPGOjF9u3qMvVeeqyKDV7Irkm0us1VaW2QjRTduEsUvdJa8EhQQam4A/exec";
 
-        let appState = {
-            isTripStarted: false,
-            initialBudget: 0,
-            spent: 0,
-            shoppingList: [],
-            tripsHistory: [],
-            currentTripExpenses: [],
-            lastAction: null,
-            lastUpdated: Date.now()
-        };
+        let state = { started: false, budget: 0, spent: 0, items: [], history: [], lastSync: 0, lastAction: null };
+        let activeId = null; let isCustom = false; let pressTimer;
 
-        let activeItemId = null;
-        let isCustomExpense = false;
-        let longPressTimeout = null;
-
-        window.addEventListener('DOMContentLoaded', () => {
-            if(localStorage.getItem('colombo_pro_v5')) {
-                let savedState = JSON.parse(localStorage.getItem('colombo_pro_v5'));
-                appState = { ...appState, ...savedState };
-            }
-            renderApp();
-            setupLongPress();
-            
-            // Auto sync check on load if URL exists
-            if(GOOGLE_APPS_SCRIPT_URL && !GOOGLE_APPS_SCRIPT_URL.includes("YOUR_DEPLOYED")) {
-                syncWithCloud(true);
-            }
-        });
-
-        function saveState() {
-            appState.lastUpdated = Date.now();
-            localStorage.setItem('colombo_pro_v5', JSON.stringify(appState));
-            pushStateToCloudSilently(); // Background sync backup
+        // --- THEME & UI LOGIC ---
+        function updateTheme() {
+            const hr = new Date().getHours();
+            const body = document.body;
+            body.className = ''; // reset
+            if(hr >= 6 && hr < 11) body.classList.add('theme-morning');
+            else if(hr >= 11 && hr < 16) body.classList.add('theme-noon');
+            else if(hr >= 16 && hr < 19) body.classList.add('theme-evening');
+            else body.classList.add('theme-night');
         }
 
-        /* NEW CORS FIX & SYNC LOGIC */
-        async function syncWithCloud(isAuto = false) {
-            if(!GOOGLE_APPS_SCRIPT_URL || GOOGLE_APPS_SCRIPT_URL.includes("YOUR_DEPLOYED")) {
-                if(!isAuto) showCustomAlert("Setup Required", "Please add your Google Apps Script URL in the code to enable Cloud Sync.", false);
-                return;
-            }
-
-            const badge = document.getElementById('syncBadge');
-            const text = document.getElementById('syncText');
-            const icon = document.getElementById('syncIconSvg');
-
-            badge.classList.remove('error', 'done');
-            badge.classList.add('syncing');
-            text.innerText = "Syncing...";
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.className = `toast-container toast-${type}`;
             
-            try {
-                // Pull latest from cloud
-                const response = await fetch(GOOGLE_APPS_SCRIPT_URL);
-                const result = await response.json();
-                
-                if(result.status === 'success' && result.state) {
-                    const cloudUpdated = result.state.lastUpdated || 0;
-                    const localUpdated = appState.lastUpdated || 0;
-                    
-                    if(cloudUpdated > localUpdated) {
-                        // Cloud has newer data, update device
-                        appState = result.state;
-                        localStorage.setItem('colombo_pro_v5', JSON.stringify(appState));
-                        renderApp();
-                    } else if (localUpdated > cloudUpdated) {
-                        // Local is newer, update cloud
-                        await pushStateToCloudSilently(false); 
-                    }
-                } else if (!result.state) {
-                    // Empty cloud, upload initial local
-                    await pushStateToCloudSilently(false);
-                }
+            const path = document.getElementById('toastIconPath');
+            if(type === 'success') path.setAttribute('d', 'M20 6L9 17l-5-5');
+            else if(type === 'warning') path.setAttribute('d', 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z');
+            else path.setAttribute('d', 'M18 6L6 18M6 6l12 12'); // error
 
-                // Show success UI (Done Checkmark)
-                badge.classList.remove('syncing');
-                badge.classList.add('done');
-                text.innerText = "Done";
-                icon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>'; 
-                
-                setTimeout(() => {
-                    badge.classList.remove('done');
-                    text.innerText = "Sync";
-                    icon.innerHTML = '<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>'; 
-                }, 2500);
-
-            } catch (error) {
-                console.error("Sync Error:", error);
-                badge.classList.remove('syncing');
-                // FIX: Show Error State on Badge
-                badge.classList.add('error');
-                text.innerText = "Error";
-                icon.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>';
-                setTimeout(() => { 
-                    badge.classList.remove('error');
-                    text.innerText = "Sync"; 
-                    icon.innerHTML = '<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>'; 
-                }, 2500);
-            }
+            // Trigger reflow for animation
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // Silent Push triggered on every app change
-        async function pushStateToCloudSilently(showUi = true) {
-            if(!GOOGLE_APPS_SCRIPT_URL || GOOGLE_APPS_SCRIPT_URL.includes("YOUR_DEPLOYED")) return;
-            
-            const badge = document.getElementById('syncBadge');
-            const text = document.getElementById('syncText');
-            const icon = document.getElementById('syncIconSvg');
-
-            if(showUi) {
-                badge.classList.remove('error', 'done');
-                badge.classList.add('syncing');
-                text.innerText = "Saving...";
-            }
-
-            try {
-                // FIX: Use mode: 'no-cors' for POST requests to Google Apps Script 
-                // This prevents the CORS block error shown in the console screenshot.
-                await fetch(GOOGLE_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'backup', state: appState })
-                });
-
-                if(showUi) {
-                    badge.classList.remove('syncing');
-                    badge.classList.add('done');
-                    text.innerText = "Done";
-                    icon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
-                    
-                    setTimeout(() => {
-                        badge.classList.remove('done');
-                        text.innerText = "Sync";
-                        icon.innerHTML = '<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>';
-                    }, 2000);
-                }
-            } catch(e) {
-                console.error("Push Error", e);
-                if(showUi) {
-                    badge.classList.remove('syncing');
-                    badge.classList.add('error');
-                    text.innerText = "Error";
-                    icon.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>';
-                    setTimeout(() => { 
-                        badge.classList.remove('error');
-                        text.innerText = "Sync"; 
-                        icon.innerHTML = '<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>'; 
-                    }, 2000);
-                }
-            }
-        }
-
-        function showCustomAlert(title, message, isConfirm, onConfirm) {
+        function showAlert(title, msg, type = 'alert', onConfirm = null) {
             document.getElementById('alertTitle').innerText = title;
-            document.getElementById('alertMessage').innerText = message;
-            const actionsDiv = document.getElementById('alertActions');
-            actionsDiv.innerHTML = '';
-            
-            if(isConfirm) {
-                actionsDiv.innerHTML = `
-                    <button class="btn btn-outline" onclick="closeModal('systemAlertModal')">Cancel</button>
-                    <button class="btn" style="background:var(--danger)" id="confirmAlertBtn">End Trip</button>
+            document.getElementById('alertMsg').innerText = msg;
+            const actions = document.getElementById('alertActions');
+            actions.innerHTML = '';
+
+            if(type === 'confirm') {
+                actions.innerHTML = `
+                    <button class="btn btn-outline" onclick="closeModal('alertModal')">Cancel</button>
+                    <button class="btn btn-danger" id="confirmBtn">Confirm</button>
                 `;
-                document.getElementById('confirmAlertBtn').onclick = () => {
-                    closeModal('systemAlertModal');
-                    if(onConfirm) onConfirm();
-                };
+                document.getElementById('confirmBtn').onclick = () => { closeModal('alertModal'); if(onConfirm) onConfirm(); };
             } else {
-                actionsDiv.innerHTML = `<button class="btn" onclick="closeModal('systemAlertModal')">Awesome</button>`;
+                actions.innerHTML = `<button class="btn btn-primary" onclick="closeModal('alertModal')">Got it</button>`;
             }
-            openModal('systemAlertModal');
+            openModal('alertModal');
         }
 
-        function renderApp() {
-            const barWrapper = document.getElementById('budgetBarWrapper');
+        // --- CORE APP LOGIC ---
+        window.onload = () => {
+            updateTheme(); setInterval(updateTheme, 60000); // Check time
             
-            if (appState.isTripStarted) {
-                barWrapper.style.display = 'block';
-                
-                const remaining = appState.initialBudget - appState.spent;
-                document.getElementById('spentLabel').innerText = `Rs. ${appState.spent.toLocaleString()}`;
-                document.getElementById('remainingLabel').innerText = `Rs. ${remaining.toLocaleString()}`;
-                
-                const percent = Math.max(0, (remaining / appState.initialBudget) * 100);
-                document.getElementById('progressBar').style.width = `${percent}%`;
-                
-                document.getElementById('centerBtnText').style.display = 'none';
-                document.getElementById('centerBtnSvg').style.display = 'block';
-                document.getElementById('centerActionBtn').classList.add('active-state');
-            } else {
-                barWrapper.style.display = 'none';
-                document.getElementById('centerBtnText').style.display = 'block';
-                document.getElementById('centerBtnSvg').style.display = 'none';
-                document.getElementById('centerActionBtn').classList.remove('active-state');
+            if(localStorage.getItem('clmb_pro_data')) {
+                state = JSON.parse(localStorage.getItem('clmb_pro_data'));
             }
-
-            const listContainer = document.getElementById('shoppingListContainer');
-            listContainer.innerHTML = '';
+            render();
             
-            const sortedList = [...appState.shoppingList].sort((a, b) => {
-                const weight = { 'pending': 1, 'not-found': 2, 'done': 3 };
-                return weight[a.status] - weight[b.status];
-            });
-
-            if(sortedList.length === 0) {
-                listContainer.innerHTML = `<div class="empty-state">Your list is empty.<br>Tap the <strong>+</strong> button to add items.</div>`;
-            }
-
-            sortedList.forEach(item => {
-                const row = document.createElement('div');
-                row.className = `item-row ${item.status === 'done' ? 'done' : ''} ${item.status === 'not-found' ? 'not-found' : ''}`;
-                row.onclick = () => openItemMenu(item.id);
-                
-                row.innerHTML = `
-                    <div class="item-details">
-                        <div class="item-title">${item.title}</div>
-                        ${item.note ? `<div class="item-note">📝 ${item.note}</div>` : ''}
-                    </div>
-                    ${item.price ? `<div class="item-price">Rs. ${item.price.toLocaleString()}</div>` : ''}
-                `;
-                listContainer.appendChild(row);
-            });
-
-            document.getElementById('undoBtn').style.display = appState.lastAction ? 'block' : 'none';
-
-            const historyContainer = document.getElementById('expensesHistoryContainer');
-            if(appState.tripsHistory.length === 0) {
-                historyContainer.innerHTML = '<div class="empty-state">No previous trips recorded.</div>';
-            } else {
-                historyContainer.innerHTML = '';
-                [...appState.tripsHistory].reverse().forEach((trip, index) => {
-                    const originalIndex = appState.tripsHistory.length - 1 - index;
-                    const bal = trip.budget - trip.spent;
-                    const card = document.createElement('div');
-                    card.className = 'history-card';
-                    card.onclick = () => showHistoryDetails(originalIndex);
-                    card.innerHTML = `
-                        <div class="history-header">
-                            <span>📅 ${trip.date}</span>
-                            <span class="click-hint">Tap for Info</span>
-                        </div>
-                        <div class="history-body">
-                            <div class="history-stat">
-                                <span>Total Budget</span>
-                                <span style="font-weight:600;">Rs. ${trip.budget.toLocaleString()}</span>
-                            </div>
-                            <div class="history-stat">
-                                <span>Total Spent</span>
-                                <span style="color:var(--danger); font-weight:600;">- Rs. ${trip.spent.toLocaleString()}</span>
-                            </div>
-                            <div class="history-stat">
-                                <span style="color:var(--color-1);">Final Balance</span>
-                                <span style="color:var(--success);">Rs. ${bal.toLocaleString()}</span>
-                            </div>
-                        </div>
-                    `;
-                    historyContainer.appendChild(card);
-                });
-            }
+            const mBtn = document.getElementById('mainBtn');
+            mBtn.addEventListener('touchstart', pressStart, {passive: true});
+            mBtn.addEventListener('touchend', pressEnd);
+            mBtn.addEventListener('mousedown', pressStart);
+            mBtn.addEventListener('mouseup', pressEnd);
+            mBtn.addEventListener('mouseleave', pressEnd);
         }
 
-        function switchView(view) {
-            document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        function saveLocal() {
+            state.lastSync = Date.now();
+            localStorage.setItem('clmb_pro_data', JSON.stringify(state));
+            render(); bgSync();
+        }
+
+        function render() {
+            const bb = document.getElementById('budgetBar');
+            if(state.started) {
+                bb.style.display = 'block';
+                const rem = state.budget - state.spent;
+                document.getElementById('spentLbl').innerText = `Rs. ${state.spent.toLocaleString()}`;
+                document.getElementById('totalLbl').innerText = `Rs. ${state.budget.toLocaleString()}`;
+                document.getElementById('remLbl').innerText = `Rs. ${rem.toLocaleString()}`;
+                document.getElementById('progFill').style.width = Math.max(0, (rem/state.budget)*100) + '%';
+                
+                document.getElementById('mainBtnTxt').style.display = 'none';
+                document.getElementById('mainBtnIco').style.display = 'block';
+                document.getElementById('mainBtn').classList.add('active-state');
+            } else {
+                bb.style.display = 'none';
+                document.getElementById('mainBtnTxt').style.display = 'block';
+                document.getElementById('mainBtnIco').style.display = 'none';
+                document.getElementById('mainBtn').classList.remove('active-state');
+            }
+
+            const lc = document.getElementById('listContainer');
+            lc.innerHTML = '';
             
-            document.getElementById(`view-${view}`).classList.add('active');
-            
-            document.querySelectorAll('.nav-tab')[view === 'list' ? 0 : 1].classList.add('active');
-            
-            document.getElementById('fabAdd').style.display = (view === 'list') ? 'flex' : 'none';
+            // Sort: pending first, then not-found, then done
+            const sortedList = [...state.items].sort((a,b) => {
+                const w = { 'pending':1, 'not-found':2, 'done':3 };
+                return w[a.status] - w[b.status];
+            });
+
+            sortedList.forEach(i => {
+                let statusIco = i.status === 'done' ? '✓ ' : i.status === 'not-found' ? '✕ ' : '';
+                lc.innerHTML += `
+                    <div class="item-row ${i.status}" onclick="openItem(${i.id})">
+                        <div class="item-info">
+                            <div class="item-title">${i.title}</div>
+                            <div class="item-meta">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                ${i.time ? i.time : 'Pending'}
+                            </div>
+                        </div>
+                        ${i.price ? `<div class="item-price">Rs. ${i.price.toLocaleString()}</div>` : ''}
+                    </div>`;
+            });
+            if(!sortedList.length) lc.innerHTML = '<div class="empty-state">Your list is empty.<br>Tap the + button to add items.</div>';
+
+            document.getElementById('undoBtn').style.display = state.lastAction ? 'block' : 'none';
+
+            const hc = document.getElementById('historyContainer');
+            hc.innerHTML = '';
+            [...state.history].reverse().forEach(h => {
+                hc.innerHTML += `
+                    <div class="item-row" style="flex-direction:column; align-items:flex-start;">
+                        <div style="width:100%; display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <span style="font-weight:600; font-size:0.9rem;">📅 ${h.date}</span>
+                            <span style="color:var(--success); font-weight:700;">Rs. ${(h.budget - h.spent).toLocaleString()}</span>
+                        </div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); display:flex; justify-content:space-between; width:100%;">
+                            <span>Spent: Rs. ${h.spent.toLocaleString()}</span>
+                            <span>Items: ${h.items}</span>
+                        </div>
+                    </div>`;
+            });
+            if(!state.history.length) hc.innerHTML = '<div class="empty-state">No trip history available.</div>';
+        }
+
+        // --- INTERACTIONS ---
+        function switchTab(v) {
+            document.querySelectorAll('.content-view').forEach(e=>e.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(e=>e.classList.remove('active'));
+            document.getElementById('view-'+v).classList.add('active');
+            document.querySelectorAll('.nav-tab')[v==='list'?0:1].classList.add('active');
+            document.getElementById('fabAdd').style.display = v==='list'?'flex':'none';
         }
 
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-        function submitNewItem() {
-            const input = document.getElementById('newItemInput');
-            if(!input.value.trim()) return;
-            appState.shoppingList.push({
-                id: Date.now(), title: input.value.trim(), status: 'pending', note: '', price: 0
-            });
-            input.value = '';
-            closeModal('addItemModal');
-            saveState(); renderApp();
+        function addItem() {
+            const v = document.getElementById('addInp').value;
+            if(!v) return;
+            state.items.push({ id:Date.now(), title:v, status:'pending', price:0, time:'' });
+            document.getElementById('addInp').value = ''; 
+            closeModal('addModal'); saveLocal();
+            showToast('Item added to list');
         }
 
-        function submitStartTrip() {
-            const val = document.getElementById('initialBudgetInput').value;
-            if(!val || val <= 0) return;
-            appState.initialBudget = parseInt(val);
-            appState.spent = 0;
-            appState.currentTripExpenses = [];
-            appState.isTripStarted = true;
-            document.getElementById('initialBudgetInput').value = '';
-            closeModal('startModal');
-            saveState(); renderApp();
-            
-            showCustomAlert("Ready to Go!", "Trip started successfully. Let's start tracking your expenses.", false);
-        }
-
-        function openItemMenu(id) {
-            activeItemId = id;
-            const item = appState.shoppingList.find(i => i.id === id);
-            document.getElementById('sheetItemTitle').innerText = item.title;
-            document.getElementById('itemActionSheet').classList.add('open');
-        }
-        function closeBottomSheet(e) {
-            if(e ? e.target.classList.contains('bottom-sheet-overlay') : true) {
-                document.getElementById('itemActionSheet').classList.remove('open');
+        function handleMainAction() {
+            if(!state.started) openModal('startModal');
+            else {
+                isCustom = true;
+                document.getElementById('expTitle').innerText = 'Log Extra Expense';
+                document.getElementById('expRsnGroup').style.display = 'block';
+                document.getElementById('expAmt').value = ''; document.getElementById('expRsn').value = '';
+                openModal('expModal');
             }
         }
 
-        function handleSheetAction(action) {
-            closeBottomSheet();
-            const item = appState.shoppingList.find(i => i.id === activeItemId);
-            
-            if(action === 'done') {
-                isCustomExpense = false;
-                document.getElementById('expenseModalTitle').innerText = `Paid for ${item.title}`;
-                document.getElementById('expenseReasonGroup').style.display = 'none';
-                document.getElementById('expenseAmountInput').value = '';
-                openModal('expenseModal');
-            } else if(action === 'notfound') {
-                appState.lastAction = JSON.parse(JSON.stringify(appState));
-                item.status = 'not-found';
-                saveState(); renderApp();
-            } else if(action === 'note') {
-                document.getElementById('noteTextInput').value = item.note || '';
-                openModal('noteModal');
-            }
+        function startTrip() {
+            const b = parseInt(document.getElementById('startInp').value);
+            if(!b || b <= 0) { showAlert("Error", "Please enter a valid budget amount."); return; }
+            state.budget = b; state.spent = 0; state.started = true;
+            closeModal('startModal'); saveLocal();
+            showToast('Trip successfully started!', 'success');
         }
 
-        function submitExpense() {
-            const amount = parseInt(document.getElementById('expenseAmountInput').value);
-            if(!amount || amount <= 0) return;
-            
-            appState.lastAction = JSON.parse(JSON.stringify(appState));
-            appState.spent += amount;
+        function openItem(id) {
+            activeId = id; const i = state.items.find(x=>x.id==id);
+            document.getElementById('sheetTitle').innerText = i.title;
+            openModal('sheetModal');
+        }
 
-            if(!isCustomExpense) {
-                const item = appState.shoppingList.find(i => i.id === activeItemId);
-                item.status = 'done';
-                item.price = amount;
+        function handleItemAction(act) {
+            closeModal('sheetModal');
+            if(act==='done') {
+                isCustom = false;
+                document.getElementById('expTitle').innerText = 'Enter Amount';
+                document.getElementById('expRsnGroup').style.display = 'none';
+                document.getElementById('expAmt').value = '';
+                openModal('expModal');
             } else {
-                const reason = document.getElementById('expenseReasonInput').value || 'Other Expense';
-                appState.currentTripExpenses.push({ reason, amount });
+                state.lastAction = JSON.parse(JSON.stringify(state)); // Backup for undo
+                state.items.find(x=>x.id==activeId).status = 'not-found';
+                saveLocal(); showToast('Marked as Not Found', 'warning');
             }
-
-            closeModal('expenseModal');
-            saveState(); renderApp();
         }
 
-        function submitItemNote() {
-            const noteText = document.getElementById('noteTextInput').value;
-            const item = appState.shoppingList.find(i => i.id === activeItemId);
-            item.note = noteText.trim();
-            closeModal('noteModal');
-            saveState(); renderApp();
-        }
-
-        document.getElementById('centerActionBtn').addEventListener('click', () => {
-            if(!appState.isTripStarted) {
-                openModal('startModal');
-            } else {
-                isCustomExpense = true;
-                document.getElementById('expenseModalTitle').innerText = 'Add Extra Expense';
-                document.getElementById('expenseReasonGroup').style.display = 'block';
-                document.getElementById('expenseReasonInput').value = '';
-                document.getElementById('expenseAmountInput').value = '';
-                openModal('expenseModal');
-            }
-        });
-
-        document.getElementById('undoBtn').addEventListener('click', () => {
-            if(appState.lastAction) {
-                appState = JSON.parse(JSON.stringify(appState.lastAction));
-                saveState(); renderApp();
-            }
-        });
-
-        function setupLongPress() {
-            const btn = document.getElementById('centerActionBtn');
-            btn.addEventListener('mousedown', startPress);
-            btn.addEventListener('touchstart', startPress);
-            btn.addEventListener('mouseup', cancelPress);
-            btn.addEventListener('mouseleave', cancelPress);
-            btn.addEventListener('touchend', cancelPress);
-        }
-
-        function startPress(e) {
-            if (!appState.isTripStarted) return;
-            longPressTimeout = setTimeout(() => {
-                showCustomAlert(
-                    "End Trip?", 
-                    "This will finalize your expenses and save the summary to your History.", 
-                    true, 
-                    endTrip
-                );
-            }, 1000); 
-        }
-
-        function cancelPress() { clearTimeout(longPressTimeout); }
-
-        function endTrip() {
-            const today = new Date().toISOString().split('T')[0];
-            const purchasedItems = appState.shoppingList.filter(i => i.status === 'done');
+        function saveExpense() {
+            const amt = parseInt(document.getElementById('expAmt').value);
+            if(!amt || amt <= 0) return;
             
-            const tripData = {
-                date: today,
-                budget: appState.initialBudget,
-                spent: appState.spent,
-                balance: appState.initialBudget - appState.spent,
-                purchasedItems: purchasedItems,
-                otherExpenses: appState.currentTripExpenses
+            state.lastAction = JSON.parse(JSON.stringify(state)); // Backup for undo
+            state.spent += amt;
+            let timeStr = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+
+            if(!isCustom) {
+                let itm = state.items.find(x=>x.id==activeId);
+                itm.status = 'done'; itm.price = amt; itm.time = timeStr;
+                showToast(`Saved Rs. ${amt} for ${itm.title}`);
+            } else {
+                let rsn = document.getElementById('expRsn').value || 'Extra Expense';
+                state.items.push({ id:Date.now(), title:rsn, status:'done', price:amt, time:timeStr });
+                showToast(`Logged Rs. ${amt} for ${rsn}`);
+            }
+            closeModal('expModal'); saveLocal();
+        }
+
+        function undoAction() {
+            if(state.lastAction) {
+                state = JSON.parse(JSON.stringify(state.lastAction));
+                state.lastAction = null;
+                saveLocal(); showToast('Action reversed', 'success');
+            }
+        }
+
+        // Long Press Logic to End Trip
+        function pressStart(e) { 
+            if(!state.started) return; 
+            pressTimer = setTimeout(triggerEndTrip, 1000); 
+        }
+        function pressEnd() { clearTimeout(pressTimer); }
+        
+        function triggerEndTrip() {
+            showAlert("End Trip", "Are you sure you want to finalize this trip? The summary will be saved to History.", "confirm", finalizeTrip);
+        }
+
+        function finalizeTrip() {
+            let dStr = new Date().toLocaleDateString('en-GB');
+            let doneCount = state.items.filter(x=>x.status=='done').length;
+            
+            let tripData = {
+                date: dStr, budget: state.budget, spent: state.spent, items: doneCount,
+                fullData: state.items.filter(x=>x.status=='done' || x.status=='not-found')
             };
-
-            appState.tripsHistory.push(tripData);
+            state.history.push(tripData);
             
-            // Push Trip Record to Google Sheet specifically
-            if(GOOGLE_APPS_SCRIPT_URL && !GOOGLE_APPS_SCRIPT_URL.includes("YOUR_DEPLOYED")) {
-                fetch(GOOGLE_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', // FIX: Added no-cors here too to prevent errors
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'endTrip', data: tripData })
-                }).catch(err => console.log("Log Error", err));
+            // Sync specific end action
+            if(APP_URL.includes("script.google")) {
+                fetch(APP_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({action:'end', data:tripData}) });
             }
 
-            appState.isTripStarted = false;
-            appState.lastAction = null;
-            appState.currentTripExpenses = [];
-            appState.shoppingList = appState.shoppingList.filter(i => i.status !== 'done');
-            
-            showCustomAlert("Trip Saved", `Awesome! Your trip is saved.\\nFinal Balance: Rs. ${tripData.balance.toLocaleString()}`, false);
-            
-            saveState(); renderApp();
+            state.started = false; state.lastAction = null;
+            state.items = state.items.filter(x=>x.status!=='done'); 
+            saveLocal(); 
+            showToast('Trip Finalized and Saved!', 'success');
         }
 
-        function showHistoryDetails(index) {
-            const trip = appState.tripsHistory[index];
-            document.getElementById('historyDetailTitle').innerText = `Date: ${trip.date}`;
-            
-            let contentHTML = '';
-            
-            if(trip.purchasedItems && trip.purchasedItems.length > 0) {
-                contentHTML += `<div class="detail-section"><h4>Purchased Items</h4>`;
-                trip.purchasedItems.forEach(item => {
-                    contentHTML += `<div class="detail-item"><span>${item.title}</span> <span class="amt">Rs. ${item.price.toLocaleString()}</span></div>`;
-                });
-                contentHTML += `</div>`;
+        // --- SYNC LOGIC ---
+        async function syncWithCloud(silent = false) {
+            if(!APP_URL.includes("script.google")) {
+                if(!silent) showAlert("Setup Required", "Please add your Google Apps Script Web App URL in the code.");
+                return;
             }
-
-            if(trip.otherExpenses && trip.otherExpenses.length > 0) {
-                contentHTML += `<div class="detail-section"><h4>Other Expenses</h4>`;
-                trip.otherExpenses.forEach(exp => {
-                    contentHTML += `<div class="detail-item other"><span>${exp.reason}</span> <span class="amt">- Rs. ${exp.amount.toLocaleString()}</span></div>`;
-                });
-                contentHTML += `</div>`;
+            const b = document.getElementById('syncBadge'); 
+            const txt = document.getElementById('syncText');
+            
+            if(!silent) { b.className = 'sync-badge syncing'; txt.innerText = 'Syncing...'; }
+            
+            try {
+                let res = await fetch(APP_URL);
+                let json = await res.json();
+                if(json.state && json.state.lastSync > state.lastSync) {
+                    state = json.state; localStorage.setItem('clmb_pro_data', JSON.stringify(state)); render();
+                } else if (!json.state || state.lastSync > json.state.lastSync) { 
+                    await bgSync(); 
+                }
+                
+                if(!silent) {
+                    b.className = 'sync-badge done'; txt.innerText = 'Done';
+                    setTimeout(()=>{ b.className='sync-badge'; txt.innerText='Sync'; }, 2000);
+                }
+            } catch(e) { 
+                if(!silent) {
+                    b.className = 'sync-badge error'; txt.innerText = 'Failed';
+                    setTimeout(()=>{ b.className='sync-badge'; txt.innerText='Sync'; }, 2000);
+                }
             }
+        }
 
-            if(!contentHTML) contentHTML = '<div style="color:var(--text-muted); font-size:0.9rem;">No detailed items saved for this trip.</div>';
-
-            document.getElementById('historyDetailContent').innerHTML = contentHTML;
-            openModal('historyDetailModal');
+        async function bgSync() {
+            if(APP_URL.includes("script.google")) {
+                fetch(APP_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({action:'sync', state:state}) });
+            }
         }
     </script>
 </body>

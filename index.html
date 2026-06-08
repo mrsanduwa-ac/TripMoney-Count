@@ -4,36 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>TripTracker Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Exact Colors from Uploaded Palette */
-            --blue-900: #005bc5; /* Darkest */
-            --blue-700: #0093cf;
-            --blue-500: #62ccf9;
-            --blue-300: #c4eeff;
-            --blue-50:  #f0faff; /* Lightest */
+            /* Light Premium Theme Colors */
+            --bg-color: #f1f5f9; /* Light Slate */
+            --surface: #ffffff; /* Pure White */
             
-            --primary: #0f172a;
-            --accent: var(--blue-700);
-            --accent-glow: rgba(0, 147, 207, 0.4);
+            --primary: #005bc5; /* Deep Blue Action */
+            --primary-hover: #004a9f;
+            --accent: #0093cf; /* Bright Blue */
+            --accent-light: #e0f2fe;
             
-            --text-main: #ffffff;
-            --text-muted: rgba(255, 255, 255, 0.7);
+            --text-main: #0f172a; /* Very Dark Slate */
+            --text-muted: #64748b; /* Gray Slate */
             --danger: #ef4444;
+            --danger-light: #fef2f2;
             --success: #10b981;
+            --success-light: #ecfdf5;
             --warning: #f59e0b;
             
-            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.2);
-            --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.3);
-            --radius-md: 16px;
-            --radius-lg: 24px;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
             
-            /* Glassmorphism Variables */
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --glass-card: rgba(0, 20, 50, 0.25);
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-float: 0 10px 25px -5px rgba(0, 91, 197, 0.3);
+            
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 24px;
         }
 
         * {
@@ -44,99 +45,71 @@
         }
 
         body {
-            background-color: var(--blue-900);
+            background-color: var(--bg-color);
             color: var(--text-main);
             overflow: hidden;
             height: 100dvh;
             display: flex; justify-content: center; align-items: center;
         }
 
-        /* --- PROFESSIONAL DYNAMIC BACKGROUND --- */
-        .scenery-container {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 0;
-            background: linear-gradient(135deg, var(--blue-900), var(--blue-700), var(--blue-900), #003b82);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Decorative Background Elements (Minimal) */
-        .bg-shape {
-            position: absolute; border-radius: 50%;
-            background: radial-gradient(circle, var(--blue-500) 0%, transparent 70%);
-            opacity: 0.15; filter: blur(40px);
-            animation: float 20s infinite alternate ease-in-out;
-        }
-        .shape-1 { width: 400px; height: 400px; top: -100px; left: -100px; }
-        .shape-2 { width: 500px; height: 500px; bottom: -200px; right: -100px; animation-delay: -5s; }
-
-        @keyframes float {
-            0% { transform: translate(0,0); }
-            100% { transform: translate(50px, 50px); }
-        }
-
-        /* --- PREMIUM UI LAYER --- */
+        /* --- APP CONTAINER --- */
         .app-container {
             width: 100%; max-width: 420px; height: 100dvh;
-            background: transparent;
+            background: var(--bg-color);
             display: flex; flex-direction: column;
             position: relative; z-index: 10;
-            box-shadow: 0 0 50px rgba(0,0,0,0.3);
+            box-shadow: var(--shadow-2xl);
         }
 
         /* Header */
         header {
             padding: 24px 24px 16px 24px;
             display: flex; justify-content: space-between; align-items: center;
-            background: transparent; z-index: 20;
+            background: var(--bg-color); z-index: 20;
         }
         header h1 { 
-            font-size: 1.35rem; font-weight: 700; letter-spacing: -0.5px; 
-            color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; 
+            color: var(--primary);
         }
 
-        /* Sync Indicator */
+        /* Sync Badge */
         .sync-badge {
             display: flex; align-items: center; gap: 6px;
-            background: var(--glass-bg); backdrop-filter: blur(12px);
+            background: var(--surface);
             padding: 8px 14px; border-radius: 20px;
-            font-size: 0.75rem; font-weight: 600; color: #ffffff;
-            cursor: pointer; border: 1px solid var(--glass-border);
+            font-size: 0.75rem; font-weight: 600; color: var(--text-main);
+            cursor: pointer; border: 1px solid var(--border);
             box-shadow: var(--shadow-sm); transition: all 0.2s;
         }
-        .sync-badge:active { transform: scale(0.95); }
-        .sync-badge.syncing svg { animation: spin 1s linear infinite; }
-        .sync-badge.done { background: var(--success); border-color: var(--success); color: #0f172a; }
-        .sync-badge.error { background: var(--danger); border-color: var(--danger); color: #fff;}
+        .sync-badge:active { transform: scale(0.95); background: var(--border-light); }
+        .sync-badge.syncing svg { animation: spin 1s linear infinite; color: var(--accent); }
+        .sync-badge.done { background: var(--success-light); color: var(--success); border-color: #d1fae5; }
+        .sync-badge.error { background: var(--danger-light); color: var(--danger); border-color: #fee2e2; }
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* Budget Progress Card */
+        /* Budget Card */
         .budget-wrapper {
-            padding: 20px 24px; background: var(--glass-card); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border-radius: var(--radius-lg); margin: 0 20px 16px 20px; display: none;
-            box-shadow: var(--shadow-md); border: 1px solid var(--glass-border);
+            padding: 24px; background: var(--surface);
+            border-radius: var(--radius-xl); margin: 0 20px 16px 20px; display: none;
+            box-shadow: var(--shadow-md); border: 1px solid var(--border);
             animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .budget-header { font-size: 0.75rem; color: var(--blue-300); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 4px; }
-        .budget-amount { font-size: 1.85rem; font-weight: 700; color: #ffffff; margin-bottom: 16px; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+        .budget-header { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 6px; }
+        .budget-amount { font-size: 2rem; font-weight: 800; color: var(--primary); margin-bottom: 20px; letter-spacing: -1px; }
         
-        .budget-stats { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 8px; font-weight: 500; }
-        .budget-stats .spent { color: rgba(255,255,255,0.85); }
-        .budget-stats .remaining { color: var(--blue-500); font-weight: 600; }
+        .budget-stats { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 12px; font-weight: 600; }
+        .budget-stats .spent { color: var(--text-muted); }
+        .budget-stats .spent span { color: var(--text-main); }
+        .budget-stats .remaining { color: var(--text-muted); }
+        .budget-stats .remaining span { color: var(--primary); }
         
-        .progress-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.15); border-radius: 6px; overflow: hidden; }
-        .progress-fill { height: 100%; width: 0%; background: var(--blue-500); border-radius: 6px; transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .progress-bg { width: 100%; height: 8px; background: var(--border-light); border-radius: 8px; overflow: hidden; }
+        .progress-fill { height: 100%; width: 0%; background: var(--primary); border-radius: 8px; transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
 
-        /* Views */
+        /* Content Views */
         .content-view {
             flex: 1; overflow-y: auto; padding: 10px 20px 120px 20px; display: none;
             -ms-overflow-style: none; scrollbar-width: none;
@@ -145,173 +118,176 @@
         .content-view.active { display: block; animation: fadeScale 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        .section-title { font-size: 1.15rem; font-weight: 700; color: #ffffff; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
-        .undo-btn { font-size: 0.75rem; color: #ffffff; font-weight: 600; cursor: pointer; padding: 6px 12px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; display: none; transition: 0.2s;}
+        .section-title { font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Filter Row & Chips */
+        .filter-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; -ms-overflow-style: none; scrollbar-width: none; }
+        .filter-row::-webkit-scrollbar { display: none; }
+        .filter-chip { 
+            padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; 
+            background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
+            cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: var(--shadow-sm);
+        }
+        .filter-chip.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(0,91,197,0.2); }
+        
+        .title-actions { display: flex; gap: 10px; align-items: center;}
+        .undo-btn { font-size: 0.75rem; color: var(--primary); font-weight: 600; cursor: pointer; padding: 8px 14px; background: var(--accent-light); border-radius: 20px; display: none; transition: 0.2s;}
         .undo-btn:active { transform: scale(0.95); }
+        .filter-icon-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 50%; width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: var(--shadow-sm); color: var(--text-muted); transition: 0.2s; }
+        .filter-icon-btn.active { color: var(--primary); border-color: var(--primary); background: var(--accent-light); }
 
-        /* List Rows */
+        /* Item Rows */
         .item-row {
-            background: var(--glass-card); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            background: var(--surface);
             padding: 16px 20px; border-radius: var(--radius-md); margin-bottom: 12px;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: var(--shadow-sm); border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-sm); border: 1px solid var(--border);
             cursor: pointer; transition: all 0.2s ease;
         }
-        .item-row:active { transform: scale(0.98); box-shadow: none; }
+        .item-row:active { transform: scale(0.98); box-shadow: none; background: var(--border-light); }
         
-        .item-row.done { opacity: 0.65; border-left: 4px solid var(--success); background: rgba(16, 185, 129, 0.1); }
-        .item-row.done .item-title { text-decoration: line-through; color: rgba(255,255,255,0.6); }
-        .item-row.not-found { border-left: 4px solid var(--danger); background: rgba(239, 68, 68, 0.15); }
+        .item-row.done { opacity: 0.6; border-left: 4px solid var(--success); background: #f8fafc; }
+        .item-row.done .item-title { text-decoration: line-through; color: var(--text-muted); }
+        .item-row.not-found { border-left: 4px solid var(--danger); background: var(--danger-light); }
         
-        .item-info { display: flex; flex-direction: column; gap: 4px; }
-        .item-title { font-weight: 600; font-size: 0.95rem; color: #ffffff; }
-        .item-meta { font-size: 0.7rem; color: var(--blue-300); display: flex; align-items: center; gap: 6px; }
-        .category-tag { background: rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 4px; font-weight: 500; font-size: 0.65rem;}
-        .item-price { font-weight: 700; color: #ffffff; font-size: 1rem; }
+        .item-info { display: flex; flex-direction: column; gap: 6px; }
+        .item-title { font-weight: 700; font-size: 0.95rem; color: var(--text-main); }
+        .item-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+        .category-tag { background: var(--bg-color); padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 0.7rem; border: 1px solid var(--border); color: var(--primary);}
+        .item-price { font-weight: 800; color: var(--primary); font-size: 1.05rem; }
 
-        /* Floating Button (FAB) */
+        /* FAB */
         .fab-add {
             position: absolute; bottom: 100px; right: 24px;
-            width: 56px; height: 56px; background: #ffffff; color: var(--blue-900);
+            width: 56px; height: 56px; background: var(--primary); color: #ffffff;
             border-radius: 50%; display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); z-index: 20;
+            box-shadow: var(--shadow-float); z-index: 20;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer;
         }
         .fab-add:active { transform: scale(0.9); }
 
-        /* Navigation Footer */
+        /* Footer */
         footer {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 80px;
-            background: rgba(0, 20, 50, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border-top: 1px solid rgba(255,255,255,0.1);
+            background: var(--surface); border-top: 1px solid var(--border);
             display: flex; justify-content: space-around; align-items: center;
             z-index: 30; padding-bottom: env(safe-area-inset-bottom);
         }
         
         .nav-tab {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: rgba(255, 255, 255, 0.4); font-size: 0.7rem; font-weight: 600; width: 70px; height: 100%;
+            color: var(--text-muted); font-size: 0.7rem; font-weight: 600; width: 70px; height: 100%;
             transition: color 0.3s; cursor: pointer;
         }
-        .nav-tab.active { color: #ffffff; }
+        .nav-tab.active { color: var(--primary); }
         .nav-tab svg { width: 22px; height: 22px; margin-bottom: 4px; fill: currentColor; transition: transform 0.3s; }
         .nav-tab.active svg { transform: translateY(-2px); }
 
-        /* Center Main Action Button */
         .center-btn-wrapper { position: relative; width: 64px; height: 64px; transform: translateY(-24px); }
         .center-action-btn {
-            width: 100%; height: 100%; background: var(--glass-card); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            width: 100%; height: 100%; background: var(--surface);
             border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            color: #ffffff; box-shadow: var(--shadow-md);
-            border: 1px solid var(--glass-border); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer;
+            color: var(--primary); box-shadow: var(--shadow-md);
+            border: 1px solid var(--border); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer;
         }
         .center-action-btn:active { transform: scale(0.9); }
-        .center-action-btn.active-state { background: #ffffff; color: var(--blue-900); border-color: transparent; }
-        .center-action-btn span { font-weight: 700; font-size: 0.75rem; letter-spacing: 0.5px; }
+        .center-action-btn.active-state { background: var(--primary); color: #ffffff; border-color: transparent; box-shadow: var(--shadow-float); }
+        .center-action-btn span { font-weight: 800; font-size: 0.75rem; letter-spacing: 0.5px; }
         .center-action-btn svg { width: 24px; height: 24px; display: none; fill: currentColor; }
 
-        /* --- GLASSY MODALS & POPUPS --- */
+        /* --- MODALS --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 10, 30, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 100;
+            background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 100;
             display: flex; justify-content: center; align-items: center;
             opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
         .modal-overlay.open { opacity: 1; pointer-events: auto; }
         
         .modal-card {
-            background: rgba(0, 30, 70, 0.85); width: 90%; max-width: 340px; 
-            border-radius: var(--radius-lg); padding: 24px;
+            background: var(--surface); width: 90%; max-width: 350px; 
+            border-radius: var(--radius-xl); padding: 28px 24px;
             transform: scale(0.95) translateY(10px); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.5); border: 1px solid var(--glass-border);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-lg); border: 1px solid var(--border);
         }
         .modal-overlay.open .modal-card { transform: scale(1) translateY(0); }
         
-        .modal-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 20px; color: #ffffff; text-align: center; }
-        .modal-message { font-size: 0.9rem; color: var(--blue-300); text-align: center; margin-bottom: 24px; line-height: 1.5; }
+        .modal-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 20px; color: var(--text-main); text-align: center; }
+        .modal-message { font-size: 0.9rem; color: var(--text-muted); text-align: center; margin-bottom: 24px; line-height: 1.5; font-weight: 500;}
         
         .form-group { margin-bottom: 16px; }
-        .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--blue-300); margin-bottom: 8px; }
+        .form-label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px; }
         .form-control { 
-            width: 100%; padding: 14px 16px; background: rgba(0,0,0,0.3); 
-            border: 1px solid var(--glass-border); border-radius: 12px; font-size: 0.95rem; color: #ffffff;
+            width: 100%; padding: 14px 16px; background: var(--bg-color); 
+            border: 1px solid var(--border); border-radius: 12px; font-size: 1rem; color: var(--text-main);
             outline: none; transition: all 0.2s; font-weight: 500;
         }
-        .form-control::placeholder { color: rgba(255,255,255,0.4); }
-        .form-control:focus { border-color: var(--blue-500); box-shadow: 0 0 0 3px rgba(98, 204, 249, 0.2); background: rgba(0,0,0,0.5); }
+        .form-control::placeholder { color: #94a3b8; }
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--accent-light); background: var(--surface); }
         
-        select.form-control { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%24%2024%22%20fill%3D%22none%22%20stroke%3D%22%23c4eeff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 16px; padding-right: 40px; }
-        select.form-control option { background: var(--blue-900); color: white; }
-
-        .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+        select.form-control { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%24%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 16px; padding-right: 40px; }
+        
+        .modal-actions { display: flex; gap: 12px; margin-top: 28px; }
         .btn { 
-            flex: 1; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; 
+            flex: 1; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 0.95rem; 
             border: none; cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;
         }
         .btn:active { transform: scale(0.96); }
-        .btn-primary { background: var(--blue-700); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-outline { background: transparent; color: #ffffff; border: 1px solid var(--glass-border); }
-        .btn-small { padding: 8px 12px; font-size: 0.8rem; border-radius: 8px; background: rgba(255,255,255,0.1); color: var(--blue-300); border: 1px solid rgba(255,255,255,0.1); width: auto; margin-top: 8px;}
+        .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
+        .btn-danger { background: var(--danger); color: white; box-shadow: var(--shadow-sm); }
+        .btn-outline { background: var(--surface); color: var(--text-main); border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+        .btn-small { padding: 10px 14px; font-size: 0.85rem; border-radius: 10px; background: var(--surface); color: var(--primary); border: 1px solid var(--border); width: auto; margin-top: 10px; box-shadow: var(--shadow-sm); font-weight: 700;}
 
         /* Bottom Sheet Options */
         .bottom-sheet {
-            position: absolute; bottom: 0; background: rgba(0, 20, 50, 0.95); width: 100%; max-width: 450px;
+            position: absolute; bottom: 0; background: var(--surface); width: 100%; max-width: 450px;
             border-radius: 24px 24px 0 0; padding: 24px; transform: translateY(100%); 
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.3); border-top: 1px solid var(--glass-border);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1); border-top: 1px solid var(--border);
         }
         .modal-overlay.open .bottom-sheet { transform: translateY(0); }
         
         .sheet-opt { 
-            padding: 16px; border-radius: 14px; margin-bottom: 12px; font-weight: 600; font-size: 0.95rem;
+            padding: 16px 20px; border-radius: 14px; margin-bottom: 12px; font-weight: 600; font-size: 0.95rem;
             display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.2s;
-            border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: #ffffff;
+            border: 1px solid var(--border); background: var(--surface); color: var(--text-main);
+            box-shadow: var(--shadow-sm);
         }
-        .sheet-opt:active { transform: scale(0.98); }
-        .sheet-opt.opt-done { color: var(--success); background: rgba(0, 245, 212, 0.1); border-color: rgba(0, 245, 212, 0.2); }
-        .sheet-opt.opt-fail { color: var(--danger); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
+        .sheet-opt:active { transform: scale(0.98); background: var(--border-light); }
+        .sheet-opt.opt-done { color: var(--success); background: var(--success-light); border-color: #d1fae5; }
+        .sheet-opt.opt-fail { color: var(--danger); background: var(--danger-light); border-color: #fee2e2; }
         
         /* Toast Notifications */
         .toast-container {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
-            background: rgba(0, 20, 50, 0.95); color: #ffffff; font-weight: 600; font-size: 0.9rem;
-            padding: 12px 24px; border-radius: 30px; box-shadow: var(--shadow-md);
-            display: flex; align-items: center; gap: 8px; z-index: 200; border: 1px solid var(--glass-border);
+            background: var(--text-main); color: var(--surface); font-weight: 600; font-size: 0.9rem;
+            padding: 14px 24px; border-radius: 30px; box-shadow: var(--shadow-lg);
+            display: flex; align-items: center; gap: 10px; z-index: 200; border: none;
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; opacity: 0;
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
         .toast-container.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .toast-icon { width: 18px; height: 18px; }
+        .toast-icon { width: 20px; height: 20px; }
         .toast-success .toast-icon { color: var(--success); }
         .toast-warning .toast-icon { color: var(--warning); }
         .toast-error .toast-icon { color: var(--danger); }
 
-        .empty-state { text-align: center; color: var(--blue-300); padding: 60px 20px; font-size: 0.95rem; font-weight: 500; }
+        .empty-state { text-align: center; color: var(--text-muted); padding: 60px 20px; font-size: 0.95rem; font-weight: 500; }
         
         /* Details List for History Popup */
         .detail-item {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.85rem; color: #e2e8f0;
+            padding: 14px 0; border-bottom: 1px solid var(--border);
+            font-size: 0.85rem; color: var(--text-main);
         }
         .detail-item:last-child { border-bottom: none; }
-        .detail-price { font-weight: 700; color: #ffffff; }
+        .detail-price { font-weight: 800; color: var(--primary); font-size: 0.95rem;}
     </style>
 </head>
 <body>
 
-    <!-- Professional Dynamic Background -->
-    <div class="scenery-container">
-        <div class="bg-shape shape-1"></div>
-        <div class="bg-shape shape-2"></div>
-    </div>
-
     <!-- TOAST NOTIFICATION -->
     <div class="toast-container" id="toast">
-        <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path id="toastIconPath" d=""/></svg>
+        <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path id="toastIconPath" d=""/></svg>
         <span id="toastMsg">Notification</span>
     </div>
 
@@ -322,7 +298,7 @@
         <header>
             <h1>TripTracker Pro</h1>
             <div class="sync-badge" id="syncBadge" onclick="syncWithCloud(false)">
-                <svg id="syncIconSvg" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
+                <svg id="syncIconSvg" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
                 <span id="syncText">Sync</span>
             </div>
         </header>
@@ -333,7 +309,7 @@
             <div class="budget-amount" id="remLbl">Rs. 0</div>
             <div class="budget-stats">
                 <span class="spent">Spent: <span id="spentLbl">Rs. 0</span></span>
-                <span class="spent">Total: <span id="totalLbl">Rs. 0</span></span>
+                <span class="remaining">Total: <span id="totalLbl">Rs. 0</span></span>
             </div>
             <div class="progress-bg"><div class="progress-fill" id="progFill"></div></div>
         </div>
@@ -342,11 +318,22 @@
         <div class="content-view active" id="view-list">
             <div class="section-title">
                 <span>Purchase List</span>
-                <span class="undo-btn" id="undoBtn" onclick="undoAction()">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" style="display:inline-block; vertical-align:middle; margin-right:2px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" transform="rotate(-90 12 12)"></path></svg>
-                    Undo
-                </span>
+                <div class="title-actions">
+                    <span class="undo-btn" id="undoBtn" onclick="undoAction()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" style="display:inline-block; vertical-align:middle; margin-right:2px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" transform="rotate(-90 12 12)"></path></svg>
+                        Undo
+                    </span>
+                    <div class="filter-icon-btn" id="filterToggleBtn" onclick="toggleFilters()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                    </div>
+                </div>
             </div>
+            
+            <!-- Category Filter Row -->
+            <div class="filter-row" id="filterRow" style="display: none;">
+                <!-- Filter chips injected here -->
+            </div>
+
             <div id="listContainer"></div>
         </div>
 
@@ -358,7 +345,7 @@
 
         <!-- Floating Add Item Button -->
         <div class="fab-add" id="fabAdd" onclick="openModal('addModal')">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </div>
 
         <!-- Footer Tab Navigation -->
@@ -390,7 +377,7 @@
             <h3 class="modal-title">Add New Item</h3>
             <div class="form-group">
                 <label class="form-label">Item Name</label>
-                <input type="text" id="addInp" class="form-control" placeholder="e.g. Mobile Display, Cables...">
+                <input type="text" id="addInp" class="form-control" placeholder="e.g. Printer Ink, Display...">
             </div>
             <div class="form-group">
                 <label class="form-label">Category</label>
@@ -398,7 +385,7 @@
                     <!-- Categories injected here -->
                 </select>
                 <button class="btn btn-small" onclick="openModal('categoryModal'); closeModal('addModal');">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     New Category
                 </button>
             </div>
@@ -415,11 +402,11 @@
             <h3 class="modal-title">New Category</h3>
             <div class="form-group">
                 <label class="form-label">Category Name</label>
-                <input type="text" id="newCatInp" class="form-control" placeholder="e.g. Electronics, Food...">
+                <input type="text" id="newCatInp" class="form-control" placeholder="e.g. Mobile Repair...">
             </div>
             <div class="modal-actions">
                 <button class="btn btn-outline" onclick="closeModal('categoryModal'); openModal('addModal');">Back</button>
-                <button class="btn btn-primary" onclick="addCategory()">Save</button>
+                <button class="btn btn-primary" onclick="addCategory()">Save Category</button>
             </div>
         </div>
     </div>
@@ -427,14 +414,14 @@
     <!-- Start Journey Modal -->
     <div class="modal-overlay" id="startModal">
         <div class="modal-card">
-            <h3 class="modal-title">Start Journey</h3>
+            <h3 class="modal-title">Start Trip</h3>
             <div class="form-group">
                 <label class="form-label">Total Budget Available (Rs.)</label>
-                <input type="number" id="startInp" class="form-control" placeholder="Amount">
+                <input type="number" id="startInp" class="form-control" placeholder="Amount in Rs.">
             </div>
             <div class="modal-actions">
                 <button class="btn btn-outline" onclick="closeModal('startModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="startTrip()">Begin</button>
+                <button class="btn btn-primary" onclick="startTrip()">Begin Tracking</button>
             </div>
         </div>
     </div>
@@ -457,7 +444,7 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Notes (Optional)</label>
-                <input type="text" id="expNote" class="form-control" placeholder="Shop name, issues...">
+                <input type="text" id="expNote" class="form-control" placeholder="Shop name, remarks...">
             </div>
             <div class="modal-actions">
                 <button class="btn btn-outline" onclick="closeModal('expModal')">Cancel</button>
@@ -479,7 +466,7 @@
     <div class="modal-overlay" id="historyDetailModal">
         <div class="modal-card" style="max-width: 380px;">
             <h3 class="modal-title" id="historyDetailTitle" style="margin-bottom: 5px;">Trip Details</h3>
-            <p style="text-align: center; color: var(--blue-300); font-size: 0.8rem; margin-bottom: 20px;" id="historyDetailSub">Date Time Info</p>
+            <p style="text-align: center; color: var(--text-muted); font-weight:600; font-size: 0.8rem; margin-bottom: 20px;" id="historyDetailSub">Date Time Info</p>
             <div id="historyDetailContent" style="max-height: 50vh; overflow-y: auto; padding-right: 5px; margin-bottom: 20px;">
                 <!-- Detailed items will be injected here -->
             </div>
@@ -494,14 +481,14 @@
         <div class="bottom-sheet" onclick="event.stopPropagation()">
             <h3 class="modal-title" id="sheetTitle" style="margin-bottom:24px;">Item Options</h3>
             <div class="sheet-opt opt-done" onclick="handleItemAction('done')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 Mark as Purchased
             </div>
             <div class="sheet-opt opt-fail" onclick="handleItemAction('notfound')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 Mark Not Found
             </div>
-            <div class="sheet-opt" onclick="closeModal('sheetModal')" style="justify-content: center; background: transparent; border-color: transparent;">
+            <div class="sheet-opt" onclick="closeModal('sheetModal')" style="justify-content: center; background: transparent; border-color: var(--border);">
                 Cancel
             </div>
         </div>
@@ -518,7 +505,7 @@
             spent: 0, 
             items: [], 
             history: [], 
-            categories: ["Electronics", "Transport", "Food", "Other"],
+            categories: [], // FIX: Start empty as requested (No Samples)
             lastSync: 0, 
             lastAction: null 
         };
@@ -526,6 +513,7 @@
         let activeId = null; 
         let isCustom = false; 
         let pressTimer;
+        let activeFilter = 'All';
 
         // --- NOTIFICATION & MODAL ANIMATION ---
         function showToast(msg, type = 'success') {
@@ -566,13 +554,14 @@
             if(localStorage.getItem('clmb_pro_data')) {
                 let saved = JSON.parse(localStorage.getItem('clmb_pro_data'));
                 state = { ...state, ...saved };
-                // Ensure categories exist
-                if(!state.categories || state.categories.length === 0) {
-                    state.categories = ["Electronics", "Transport", "Food", "Other"];
+                // FIX: Ensure categories is ALWAYS an array to prevent .includes() error
+                if(!state.categories || !Array.isArray(state.categories)) {
+                    state.categories = [];
                 }
             }
             render();
             updateCategoryDropdowns();
+            renderFilters();
             
             const mBtn = document.getElementById('mainBtn');
             mBtn.addEventListener('touchstart', pressStart, {passive: true});
@@ -600,19 +589,56 @@
             const addCat = document.getElementById('addCatInp');
             const expCat = document.getElementById('expCatInp');
             let options = state.categories.map(c => `<option value="${c}">${c}</option>`).join('');
+            if(!options) options = `<option value="" disabled selected>No categories available</option>`;
             addCat.innerHTML = options;
             expCat.innerHTML = options;
         }
 
+        // --- NEW: FILTER LOGIC ---
+        function toggleFilters() {
+            const row = document.getElementById('filterRow');
+            const btn = document.getElementById('filterToggleBtn');
+            if(row.style.display === 'none') {
+                row.style.display = 'flex';
+                btn.classList.add('active');
+            } else {
+                row.style.display = 'none';
+                btn.classList.remove('active');
+                if(activeFilter !== 'All') setFilter('All');
+            }
+        }
+
+        function renderFilters() {
+            const row = document.getElementById('filterRow');
+            let html = `<div class="filter-chip ${activeFilter === 'All' ? 'active' : ''}" onclick="setFilter('All')">All</div>`;
+            state.categories.forEach(c => {
+                html += `<div class="filter-chip ${activeFilter === c ? 'active' : ''}" onclick="setFilter('${c}')">${c}</div>`;
+            });
+            row.innerHTML = html;
+        }
+
+        function setFilter(cat) {
+            activeFilter = cat;
+            renderFilters();
+            render();
+        }
+
         function addCategory() {
             const newCat = document.getElementById('newCatInp').value.trim();
+            if(!state.categories) state.categories = []; // Safety check
+            
             if(newCat && !state.categories.includes(newCat)) {
                 state.categories.push(newCat);
                 updateCategoryDropdowns();
+                renderFilters();
                 document.getElementById('newCatInp').value = '';
                 closeModal('categoryModal');
                 openModal('addModal');
-                document.getElementById('addCatInp').value = newCat; // auto select
+                
+                // Set the newly created category as selected
+                const addCatDropdown = document.getElementById('addCatInp');
+                addCatDropdown.value = newCat; 
+                
                 saveLocal();
                 showToast('Category added successfully');
             } else if (state.categories.includes(newCat)) {
@@ -643,13 +669,19 @@
             const lc = document.getElementById('listContainer');
             lc.innerHTML = '';
             
-            const sortedList = [...state.items].sort((a,b) => {
+            // Filter & Sort
+            let filteredList = state.items;
+            if(activeFilter !== 'All') {
+                filteredList = state.items.filter(i => i.category === activeFilter);
+            }
+
+            const sortedList = [...filteredList].sort((a,b) => {
                 const w = { 'pending':1, 'not-found':2, 'done':3 };
                 return w[a.status] - w[b.status];
             });
 
             sortedList.forEach(i => {
-                const timeIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:2px; vertical-align:text-bottom;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
+                const timeIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:2px; vertical-align:text-bottom;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
                 const statusStr = i.status === 'not-found' ? 'Not Found' : (i.time ? `${timeIcon}${i.time}` : 'Pending');
                 
                 lc.innerHTML += `
@@ -657,14 +689,18 @@
                         <div class="item-info">
                             <div class="item-title">${i.title}</div>
                             <div class="item-meta">
-                                <span class="category-tag">${i.category}</span>
+                                <span class="category-tag">${i.category || 'General'}</span>
                                 <span>${statusStr}</span>
                             </div>
                         </div>
                         ${i.price ? `<div class="item-price">Rs. ${i.price.toLocaleString()}</div>` : ''}
                     </div>`;
             });
-            if(!sortedList.length) lc.innerHTML = '<div class="empty-state">Your list is empty.<br>Tap the + button to add items.</div>';
+            if(!sortedList.length) {
+                lc.innerHTML = activeFilter !== 'All' 
+                    ? `<div class="empty-state">No items found in ${activeFilter}.</div>`
+                    : `<div class="empty-state">Your list is empty.<br>Tap the + button to add items.</div>`;
+            }
 
             document.getElementById('undoBtn').style.display = state.lastAction ? 'block' : 'none';
 
@@ -677,12 +713,12 @@
                     <div class="item-row" style="flex-direction:column; align-items:flex-start; cursor:pointer;" onclick="showHistoryDetails(${originalIndex})">
                         <div style="width:100%; display:flex; justify-content:space-between; margin-bottom:8px; align-items:center;">
                             <div style="display:flex; align-items:center; gap:6px;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue-500)" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                <span style="font-weight:600; font-size:0.9rem; color:#fff;">${h.date}</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                <span style="font-weight:700; font-size:0.95rem; color:var(--text-main);">${h.date}</span>
                             </div>
-                            <span style="color:var(--success); font-weight:700;">Rs. ${(h.budget - h.spent).toLocaleString()}</span>
+                            <span style="color:var(--primary); font-weight:800;">Rs. ${(h.budget - h.spent).toLocaleString()}</span>
                         </div>
-                        <div style="font-size:0.75rem; color:var(--blue-300); display:flex; justify-content:space-between; width:100%;">
+                        <div style="font-size:0.75rem; color:var(--text-muted); display:flex; justify-content:space-between; width:100%; font-weight:600;">
                             <span>Spent: Rs. ${h.spent.toLocaleString()}</span>
                             <span>Items: ${h.items} (Tap to view)</span>
                         </div>
@@ -691,7 +727,7 @@
             if(!state.history.length) hc.innerHTML = '<div class="empty-state">No trip history available.</div>';
         }
 
-        // --- NEW: HISTORY DETAILS POPUP LOGIC ---
+        // --- HISTORY DETAILS POPUP LOGIC ---
         function showHistoryDetails(index) {
             const trip = state.history[index];
             document.getElementById('historyDetailTitle').innerText = `Trip Summary`;
@@ -704,21 +740,21 @@
                     const isPurchased = item.status === 'done';
                     
                     let statusIcon = isPurchased 
-                        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg>` 
-                        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+                        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg>` 
+                        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
                     
                     const priceText = isPurchased ? `Rs. ${item.price.toLocaleString()}` : '-';
-                    const priceColor = isPurchased ? '#ffffff' : 'var(--text-muted)';
+                    const priceColor = isPurchased ? 'var(--primary)' : 'var(--text-muted)';
                     
                     content += `
                         <div class="detail-item">
-                            <div style="display:flex; flex-direction:column; gap:2px;">
-                                <div style="display:flex; align-items:center; gap:6px;">
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <div style="display:flex; align-items:center; gap:8px;">
                                     ${statusIcon}
-                                    <span style="color:${isPurchased ? '#fff' : 'var(--text-muted)'}; font-weight:500;">${item.title}</span>
+                                    <span style="color:${isPurchased ? 'var(--text-main)' : 'var(--text-muted)'}; font-weight:700;">${item.title}</span>
                                 </div>
-                                <span style="font-size:0.65rem; color:var(--blue-500); margin-left:20px;">
-                                    ${item.category} ${item.time ? `• ${item.time}` : ''} ${item.note ? `• ${item.note}` : ''}
+                                <span style="font-size:0.7rem; color:var(--text-muted); margin-left:24px; font-weight:500;">
+                                    ${item.category || 'General'} ${item.time ? `• ${item.time}` : ''} ${item.note ? `• ${item.note}` : ''}
                                 </span>
                             </div>
                             <span class="detail-price" style="color: ${priceColor};">${priceText}</span>
@@ -730,9 +766,9 @@
             }
             
             content += `
-                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between;">
-                    <span style="color:var(--text-muted); font-weight:600; font-size:0.85rem;">Total Spent</span>
-                    <span style="color:var(--danger); font-weight:700; font-size:1rem;">Rs. ${trip.spent.toLocaleString()}</span>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border); display:flex; justify-content:space-between;">
+                    <span style="color:var(--text-muted); font-weight:700; font-size:0.85rem;">Total Spent</span>
+                    <span style="color:var(--danger); font-weight:800; font-size:1.1rem;">Rs. ${trip.spent.toLocaleString()}</span>
                 </div>
             `;
             
@@ -762,7 +798,7 @@
             const v = document.getElementById('addInp').value.trim();
             const cat = document.getElementById('addCatInp').value;
             if(!v) return;
-            state.items.push({ id:Date.now(), title:v, category:cat, status:'pending', price:0, time:'', note:'' });
+            state.items.push({ id:Date.now(), title:v, category:cat || '', status:'pending', price:0, time:'', note:'' });
             document.getElementById('addInp').value = ''; 
             closeModal('addModal'); saveLocal();
             showToast('Item added to list');
@@ -828,7 +864,7 @@
                 showToast(`Saved Rs. ${amt} for ${itm.title}`);
             } else {
                 let rsn = document.getElementById('expRsn').value || 'Extra Expense';
-                let cat = document.getElementById('expCatInp').value;
+                let cat = document.getElementById('expCatInp').value || '';
                 state.items.push({ id:Date.now(), title:rsn, category:cat, status:'done', price:amt, time:timeStr, note:note });
                 showToast(`Logged Rs. ${amt} for ${rsn}`);
             }
@@ -874,7 +910,7 @@
                     date: dStr,
                     time: item.time,
                     item: item.title,
-                    category: item.category,
+                    category: item.category || 'General',
                     price: item.price,
                     status: item.status,
                     note: item.note
@@ -915,8 +951,15 @@
                 
                 if(json.state && json.state.lastSync > state.lastSync) {
                     state = json.state; 
+                    
+                    // FIX: Double-check categories array after downloading from cloud
+                    if(!state.categories || !Array.isArray(state.categories)) {
+                        state.categories = [];
+                    }
+                    
                     localStorage.setItem('clmb_pro_data', JSON.stringify(state)); 
                     updateCategoryDropdowns();
+                    renderFilters();
                     render();
                 } else if (!json.state || state.lastSync > json.state.lastSync) { 
                     await bgSync(); 

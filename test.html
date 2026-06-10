@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Out Fashion - Order Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Professional & User-Friendly Color Palette */
+        :root {
+            --bg-main: #f8f9fa;
+            --bg-card: #ffffff;
+            --bg-card-section: #f1f3f5;
+            --color-primary: #005A9C;
+            --color-primary-hover: #004B80;
+            --color-secondary: #6c757d;
+            --text-primary: #212529;
+            --border-color: #dee2e6;
+            --border-focus: #80bdff;
+            --danger: #d9534f;
+            --danger-hover: #c9302c;
+            --success: #5cb85c;
+            --success-hover: #4cae4c;
+            --warning: #f0ad4e;
+            --warning-hover: #ec971f;
+            --info: #5bc0de;
+            --info-hover: #31b0d5;
+        }
+        
+        html { height: 100%; }
+        body {
+            display: flex;
+            flex-direction: column; 
+            justify-content: space-between;
+            align-items: center;
+            min-height: 100vh;
+            background: #f8f9fa;
+            color: var(--text-primary);
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            padding: 0; 
+        }
+        
+        .main-content-wrapper {
+            display: flex; 
+            justify-content: center;
+            align-items: flex-start;
+            flex-grow: 1;
+            width: 100%;
+            padding: 1rem; 
+            padding-bottom: 90px; /* Space for fixed footer */
+            max-width: 1200px; 
+            pointer-events: auto;
+            background: linear-gradient(-45deg, #e7f5ff, #f8f9fa, #e9ecef, #dee2e6);
+            background-size: 400% 400%;
+            animation: gradientAnimation 30s ease infinite;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- LOADING OVERLAY --- */
+        #loadingOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.95);
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 150;
+            transition: opacity 0.3s ease;
+        }
+        .spinner {
+            --size: 60px;
+            --border: 8px;
+            width: var(--size);
+            height: var(--size);
+            border-radius: 50%;
+            border: var(--border) solid #f3f3f3;
+            border-top: var(--border) solid var(--color-primary);
+            filter: drop-shadow(0 0 5px var(--color-primary));
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Touch Lock Overlay */
+        #touchLockOverlay {
+            position: fixed; inset: 0; z-index: 49; background: transparent; pointer-events: none; transition: background 0.3s;
+        }
+        #touchLockOverlay.locked {
+            pointer-events: auto; background: rgba(0, 0, 0, 0.05); cursor: not-allowed;
+        }
+        .main-content-wrapper.locked { pointer-events: none; }
+
+        .overflow-y-auto::-webkit-scrollbar { width: 8px; }
+        .overflow-y-auto::-webkit-scrollbar-track { background: #e9ecef; }
+        .overflow-y-auto::-webkit-scrollbar-thumb { background: #adb5bd; border-radius: 10px; }
+
+        /* Card and Button Styles */
+        .card { background-color: var(--bg-card); border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.08); width: 100%; }
+        .bg-card-section { background-color: var(--bg-card-section); }
+        .border-theme { border-color: var(--border-color); }
+        h1, h2 { color: var(--color-primary); }
+        .text-secondary { color: var(--color-secondary); }
+
+        .btn { transition: background-color .2s, transform .1s, box-shadow .2s; border: none; }
+        .btn:active { transform: scale(.98); }
+        .btn-primary { background-color: var(--color-primary); color: white; }
+        .btn-primary:hover { background-color: var(--color-primary-hover); }
+        .btn-secondary { background-color: #e9ecef; color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background-color: #ced4da; }
+        .btn-danger { background-color: var(--danger); color: white; }
+        .btn-danger:hover { background-color: var(--danger-hover); }
+        .btn-info { background-color: var(--info); color: white; }
+        .btn-info:hover { background-color: var(--info-hover); }
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-success:hover { background-color: var(--success-hover); }
+        .btn-warning { background-color: var(--warning); color: white; }
+        .btn-warning:hover { background-color: var(--warning-hover); }
+
+        input, select, textarea { background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 0.375rem; }
+        input::placeholder { color: var(--color-secondary); opacity: 0.8; }
+        input:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); }
+
+        .status-message { transition: all .4s ease-in-out; opacity: 0; transform: translateY(-15px); max-height: 0; margin-top: 0; padding: 0 !important; }
+        .status-message.show { opacity: 1; transform: translateY(0); max-height: 100px; padding: .75rem !important; margin-top: .75rem; }
+        .bg-green-status { background-color: #dff0d8; border: 1px solid #d6e9c6; color: #3c763d; }
+        .bg-red-status { background-color: #f2dede; border: 1px solid #ebccd1; color: #a94442; }
+        .auto-save-status { opacity: 0; transition: opacity .5s ease; color: var(--success); }
+        .auto-save-status.show { opacity: 1; }
+        
+        #recycle-bin-modal { display: none; }
+        #recycle-bin-modal.show { display: flex; }
+
+        /* --- CUSTOM TOGGLE SWITCH STYLES --- */
+        .toggle-checkbox:checked { right: 0; border-color: #68D391; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #68D391; }
+        .toggle-checkbox:checked + .toggle-label:before { transform: translateX(100%); }
+        .toggle-label { width: 50px; height: 26px; background-color: #CBD5E0; border-radius: 9999px; position: relative; cursor: pointer; transition: background-color 0.2s ease-in; }
+        .toggle-label:before { content: ''; position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; background-color: white; border-radius: 50%; transition: transform 0.2s ease-in; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+        .lang-btn { padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: bold; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+        .lang-btn.active { background-color: var(--color-primary); color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .lang-btn.inactive { background-color: #e2e8f0; color: #718096; }
+        .lang-btn.inactive:hover { background-color: #cbd5e0; }
+
+        @page { size: auto; margin: 0; }
+        @media print {
+            body { display: block; background: #fff !important; }
+            .card { box-shadow: none !important; border: none !important; max-width: 100% !important; }
+            body > *:not(#print-area):not(#touchLockBtnContainer):not(#loadingOverlay) { display: none !important; }
+            #print-area { display: block !important; position: relative; left: 0; top: 0; width: 100%; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; color: #000; }
+            .no-print { display: none !important; }
+            
+            /* PRINT STYLES */
+            .print-page { 
+                position: relative; 
+                width: 210mm; 
+                height: 297mm; /* A4 Height */
+                page-break-after: always; 
+                padding: 10mm;
+                overflow: hidden;
+            }
+            .print-page:last-child { page-break-after: auto; }
+
+            .print-header { display: block; text-align: center; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 10px; }
+            .print-title-group { display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 5px; }
+            .print-header .company-logo { height: 35px; }
+            .print-header .company-name-print { font-family: 'Impact', 'Arial Narrow Bold', sans-serif; font-size: 16pt; letter-spacing: 1px; }
+            .print-header .print-date { font-size: 12pt; font-weight: bold; display: block; text-align: center; }
+            
+            .print-list-container { 
+                display: grid; 
+                grid-template-columns: repeat(5, 1fr); 
+                column-gap: 12px; 
+                font-size: 10pt; 
+                max-width: 100%; 
+                margin-top: 10px; 
+                align-content: start;
+            }
+            .print-column div { margin-bottom: 1px; white-space: nowrap; }
+
+            /* Signature & Total Box Styles */
+            .footer-container {
+                position: absolute;
+                bottom: 20mm;
+                left: 10mm;
+                right: 10mm;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-end;
+            }
+
+            .total-box {
+                border: 2px solid #000;
+                padding: 10px 20px;
+                font-weight: bold;
+                font-size: 14pt;
+                background: #fff;
+            }
+
+            .signature-area { 
+                width: 30%; 
+                font-size: 10pt; 
+                text-align: center;
+            }
+            .signature-line {
+                border-top: 1px solid #000;
+                padding-top: 5px;
+                margin-top: 30px;
+            }
+            
+            .print-watermark-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.15; pointer-events: none; z-index: -1; }
+            .print-watermark-overlay img { width: 400px; height: auto; }
+            .print-footer-watermark { position: absolute; bottom: 5mm; left: 0; width: 100%; text-align: center; font-size: 8pt; color: #888; }
+        }
+        
+        @keyframes slideInFromLeft{ from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+        .icon-online { color: var(--success); }
+        .icon-offline { color: var(--danger); }
+        @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+        .blinking-alert { animation: blink 1s step-start infinite; color: var(--danger) !important; }
+
+        /* Flip Counter Styles */
+        .flip-counter { 
+            height: 100%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-family: 'Impact', monospace; 
+        }
+        .flip-digit-container { 
+            position: relative; 
+            width: 35px; 
+            height: 50px; 
+            overflow: hidden; 
+            background-color: #212529; 
+            border-radius: 4px; 
+            margin: 0 1px; 
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); 
+            perspective: 200px; 
+        }
+        .flip-digit-container:not(:last-child):after { content: ''; position: absolute; right: -2px; top: 0; width: 1px; height: 100%; background-color: #8fbc8f; z-index: 10; }
+        .flip-digit { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 36px; 
+            font-weight: bold; 
+            color: white; 
+            backface-visibility: hidden; 
+            line-height: 1; 
+            transform: translateY(100%); 
+        }
+        .flip-digit.current { transform: translateY(0%); }
+        @keyframes flipCounterSuccessBlink { 0%, 100% { background-color: #212529; box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); } 50% { background-color: var(--success); box-shadow: 0 0 10px var(--success); } }
+        .flip-counter.success-blink .flip-digit-container { animation: flipCounterSuccessBlink 0.2s ease-in-out 5; }
+
+        /* Confetti Animation */
+        #confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 60; display: none; }
+        .confetti { position: absolute; width: 10px; height: 10px; background-color: #f0f0f0; opacity: 0; transform-origin: 50% 50%; animation: confetti-fall 3s linear infinite; }
+        @keyframes confetti-fall { 0% { transform: translate3d(var(--x-start), var(--y-start), 0) rotate(0deg); opacity: 1; } 100% { transform: translate3d(var(--x-end), var(--y-end), 0) rotate(720deg); opacity: 0.2; } }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="no-print">
+        <div class="spinner mb-4"></div>
+        <p id="loadingText" class="text-xl font-semibold text-primary">Loading...</p>
+    </div>
+    
+    <!-- Touch Lock Overlay -->
+    <div id="touchLockOverlay"></div>
+
+    <!-- Touch Lock Button -->
+    <div id="touchLockBtnContainer" class="fixed top-4 right-4 z-50 no-print">
+        <button id="touchLockBtn" class="p-3 rounded-full shadow-lg btn btn-secondary opacity-70 hover:opacity-100 transition duration-300 transform hover:scale-105">
+            <svg id="lockIconOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0v4m-5 4h2m-2 4h2m-6-4h2m-2 4h2" />
+            </svg>
+            <svg id="lockIconClosed" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="currentColor" viewBox="0 0 20 20">
+                 <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2V7a3 3 0 00-6 0v2h6z" clip-rule="evenodd" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Confetti Container -->
+    <div id="confetti-container"></div>
+    
+    <!-- Main App Wrapper -->
+    <div class="main-content-wrapper">
+        <div id="app-container" class="card p-6 lg:p-8 rounded-2xl w-full no-print">
+            
+            <!-- HEADER (Balanced Layout) -->
+            <header class="flex justify-between items-center mb-4 flex-wrap gap-4 border-b border-theme pb-4">
+                <!-- Left: Logo & Title -->
+                <div class="flex items-center gap-4">
+                    <img src="logo.png" alt="Company Logo" class="h-12" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iaC0xMiB3LTEyIHRleHQtYmx1ZS02MDAiPjxwYXRoIGQ9Ik0xMiAyTDQgNWw4IDMgOC0zLTgtM3oiLz48cGF0aCBkPSJNMTIgMjJWMTEiLz48cGF0aCBkPSJNMjIgNXYxMkwxMiAyMiIgLz48cGF0aCBkPSJNMCA1djEybDEyIDUiLz48L3N2Zz4='">
+                    <h1 id="appTitle" class="text-2xl lg:text-3xl font-bold"></h1>
+                </div>
+
+                <!-- Right: Audio Controls & Clock -->
+                <div class="flex items-center gap-6 ml-auto order-2">
+                     <!-- AUDIO CONTROL PANEL -->
+                     <div id="audio-control-panel" class="flex items-center gap-3 p-1">
+                        <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Sound</span>
+                        
+                        <!-- Toggle Switch -->
+                        <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="audioToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300"/>
+                            <label for="audioToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                        </div>
+                        
+                        <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Voice</span>
+
+                        <!-- Language Selector (Hidden by default) -->
+                        <div id="voiceLangSelector" class="flex bg-gray-200 rounded-full p-1 ml-1 hidden transition-all duration-300">
+                            <button id="langEnBtn" class="lang-btn active" onclick="setVoiceLang('en')">En</button>
+                            <button id="langSiBtn" class="lang-btn inactive" onclick="setVoiceLang('si')">සිං</button>
+                        </div>
+                    </div>
+
+                    <div id="live-clock" class="text-lg lg:text-xl font-semibold text-secondary w-full lg:w-auto text-center hidden sm:block"></div>
+                </div>
+            </header>
+            
+            <main class="flex flex-col lg:flex-row gap-8 mt-4">
+                <!-- Left Column -->
+                <section id="left-column" class="w-full lg:w-3/5 flex flex-col gap-y-6">
+                    <p id="scanOrderDescription" class="text-center text-secondary -mt-2"></p>
+                    
+                    <div>
+                         <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" id="orderScanInput" class="flex-grow p-3 shadow-sm" />
+                            <button id="addOrderBarcodeBtn" class="px-5 py-3 rounded-lg font-semibold shadow-md btn btn-primary"></button>
+                            <!-- Updated Camera Button (Opens New Window) -->
+                            <button id="openCameraBtn" class="p-3 rounded-lg font-semibold shadow-md btn btn-success text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="statusMessage" class="status-message rounded-lg text-center font-semibold p-3"></div>
+                    </div>
+                    <div>
+                        <!-- Updated Header to match image -->
+                        <h2 id="scannedListHeader" class="text-xl font-bold mb-4 border-b-2 border-theme pb-2 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                            Scanned Today
+                        </h2>
+                        <div id="orderListContainer" class="bg-card-section p-4 rounded-lg border border-theme max-h-60 lg:max-h-96 overflow-y-auto shadow-inner">
+                            <ul id="scannedOrderBarcodesList" class="space-y-2">
+                                <p id="noOrderBarcodesMessage" class="text-secondary text-center py-4"></p>
+                            </ul>
+                        </div>
+                    </div>
+                     <button id="returnToTodayBtn" class="w-full px-6 py-3 rounded-lg font-semibold shadow-md btn btn-secondary"></button>
+                </section>
+
+                <!-- Right Column -->
+                <aside id="right-column" class="w-full lg:w-2/5 flex flex-col gap-y-8">
+                    <!-- Status & Counter -->
+                    <div class="p-6 bg-card-section rounded-xl border border-theme shadow-inner h-fit">
+                        <div class="mb-4">
+                            <div id="connectionStatus" class="flex items-center justify-center gap-2 mb-2 p-2 rounded-lg border border-gray-300">
+                                <span class="font-semibold text-sm text-secondary">Connection:</span>
+                                <span id="networkIcon" class="text-xl"></span>
+                                <span id="networkText" class="font-bold">Checking...</span>
+                            </div>
+
+                            <div class="p-3 bg-blue-50 rounded-lg border border-blue-200 text-center shadow-inner mt-4">
+                                <p class="text-lg font-semibold text-primary mb-2" id="uniqueOrderCountLabel"></p>
+                                <!-- FIXED HEIGHT & PADDING HERE -->
+                                <div id="animatedCounter" class="flex justify-center items-center h-20 py-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Features -->
+                    <div id="advanced-features-section" class="p-6 bg-card-section rounded-xl border border-theme shadow-inner h-fit -mt-4">
+                         <h2 id="exportTitle" class="text-xl font-bold mb-4 border-b-2 border-theme pb-2"></h2>
+                         
+                         <!-- NEW: TARGET SETUP CSV UPLOAD -->
+                         <div class="mb-4">
+                             <h3 class="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Daily Target Setup</h3>
+                             <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+                             <button id="uploadCsvBtn" class="w-full px-6 py-3 rounded-lg font-semibold shadow-md btn btn-primary flex items-center justify-center gap-2 mb-2">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                                 Upload Target (CSV)
+                             </button>
+                         </div>
+                         <hr class="my-4 border-gray-300">
+
+                         <button id="saveToSheetBtn" class="w-full px-6 py-3 rounded-lg font-semibold shadow-md btn btn-warning">
+                            <span id="saveBtnText">Save to Google Sheet</span>
+                            <div id="saveBtnSpinner" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white mx-auto"></div>
+                         </button>
+                         <p id="sheetStatus" class="text-center text-sm h-4 mt-2"></p>
+                         <hr class="my-4 border-gray-300">
+                         <button id="printScannedOrderBtn" class="w-full px-6 py-3 rounded-lg font-semibold shadow-md btn btn-info"></button>
+                         <button id="downloadCsvBtn" class="mt-4 w-full px-6 py-3 rounded-lg font-semibold shadow-md btn btn-success"></button>
+                    </div>
+                    
+                    <!-- Session Management -->
+                    <div id="session-load-section" class="p-6 bg-card-section rounded-xl border border-theme shadow-inner h-fit">
+                        <div class="flex justify-between items-center mb-4 pb-2 border-b-2 border-theme">
+                            <h2 id="loadPreviousOrdersTitle" class="text-xl font-bold"></h2>
+                            <span id="autoSaveStatus" class="auto-save-status font-semibold text-sm">✓ Saved</span>
+                        </div>
+                        
+                        <button id="openRecycleBinBtn" class="w-full mb-4 px-6 py-2 rounded-lg font-semibold shadow-md btn btn-secondary flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 10-2 0v6a1 1 0 102 0V8z" clip-rule="evenodd" />
+                            </svg>
+                            <span id="recycleBinCount">Recycle Bin (0)</span>
+                        </button>
+
+                        <div id="barcode-search-section" class="mb-4">
+                            <label for="barcodeSearchInput" class="block mb-2 text-sm font-medium text-secondary">Search Barcode</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="barcodeSearchInput" placeholder="Enter barcode to find..." class="w-full p-2">
+                                <button id="barcodeSearchBtn" class="px-4 py-2 rounded-lg font-semibold shadow-md btn btn-info">Search</button>
+                            </div>
+                            <p id="barcodeSearchResult" class="text-center text-sm h-4 mt-2"></p>
+                        </div>
+                        <hr id="search-hr" class="my-4 border-gray-300">
+                        
+                        <div id="liveSessionDisplay" class="mb-2 p-3 bg-green-100 rounded-lg text-center border border-green-200 hidden">
+                            <p class="text-sm text-green-800">Live Session:</p>
+                            <p id="liveSessionName" class="font-bold text-lg text-green-900"></p>
+                        </div>
+                        
+                        <button id="manualSaveBtn" class="w-full mb-4 px-6 py-2 rounded-lg font-semibold shadow-md btn btn-success text-sm">
+                            <span id="manualSaveBtnText">Save Current Session</span>
+                            <div id="manualSaveBtnSpinner" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-white mx-auto"></div>
+                        </button>
+                        
+                        <div>
+                             <div class="mb-4">
+                                 <label id="searchByDateLabel" for="searchByDate" class="block mb-2 text-sm font-medium text-secondary"></label>
+                                 <div class="flex gap-2">
+                                    <input type="date" id="searchByDate" class="w-full p-2">
+                                    <button id="resetDateFilterBtn" class="px-4 py-2 rounded-lg font-semibold shadow-md btn btn-secondary text-xs"></button>
+                                 </div>
+                             </div>
+                             <div class="flex flex-col sm:flex-row gap-4">
+                                <select id="savedSessionsSelect" class="flex-grow p-3"><option value=""></option></select>
+                                <button id="loadSelectedSessionBtn" class="px-6 py-3 rounded-lg font-semibold shadow-md btn btn-primary"></button>
+                             </div>
+                        </div>
+                    </div>
+                </aside>
+            </main>
+        </div>
+    </div>
+    
+    <!-- STICKY PROGRESS FOOTER -->
+    <div id="sticky-progress-footer" class="fixed bottom-0 left-0 w-full bg-white shadow-[0_-8px_15px_-3px_rgba(0,0,0,0.15)] border-t border-gray-300 z-50 p-2 lg:p-3 no-print transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex flex-col gap-1.5">
+            <div class="flex justify-between items-center text-xs lg:text-sm font-bold px-1">
+                <span id="targetText" class="text-blue-700">🎯 Target: 0</span>
+                <span id="progressText" class="text-gray-800 font-extrabold text-lg">0%</span>
+                <span id="pendingText" class="text-red-500">⏳ Pending: 0</span>
+            </div>
+            <!-- Segmented Progress Bar -->
+            <div id="segmentedProgressBar" class="w-full h-4 lg:h-5 bg-gray-200 rounded-full overflow-hidden flex shadow-inner">
+                <!-- JS will populate segments here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Recycle Bin Modal -->
+    <div id="recycle-bin-modal" class="fixed inset-0 bg-black bg-opacity-75 items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
+            <h3 class="text-lg font-bold mb-4 text-center text-primary flex justify-center items-center gap-2">Recycle Bin</h3>
+            <div id="recycleBinListContainer" class="bg-card-section p-4 rounded-lg border border-theme max-h-80 overflow-y-auto shadow-inner">
+                <ul id="recycleBinList" class="space-y-2"><p id="noRecycleItems" class="text-secondary text-center py-4">Recycle bin is empty.</p></ul>
+            </div>
+            <div class="flex gap-4 mt-4">
+                 <button id="restoreSelectedBtn" class="px-5 py-2 rounded-lg font-semibold shadow-md btn btn-success flex-grow">Restore Selected</button>
+                 <button id="closeRecycleBinBtn" class="px-5 py-2 rounded-lg font-semibold shadow-md btn btn-secondary flex-grow">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRINT AREA -->
+    <div id="print-area" class="hidden"></div>
+
+    <!-- Audio Files (Still needed for main screen manual entry) -->
+    <audio id="successSound" src="play.mp3" preload="auto"></audio>
+    <audio id="errorSound" src="error.mp3" preload="auto"></audio>
+    <audio id="milestoneSound" src="goal.mp3" preload="auto"></audio>
+
+    <script>
+        // PUT YOUR NEW DEPLOYMENT URL HERE
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2l5IrXTmdgxt1-0STTdcXSyE3hNL4BtoE_nS_-TkU6rwtIEEWC7e5o6d4khHIGsX3/exec"; 
+        const MILESTONE_COUNT = 10; 
+
+        let scannedBarcodes = [];
+        let targetBarcodes = []; // NEW: Store daily targets
+
+        let currentSessionId = null;
+        let currentlyViewingBarcodes = [];
+        let currentlyViewingSessionId = null;
+        let allSessions = [];
+        let recycleBin = [];
+        let isTouchLocked = false;
+        let countUpdateInterval = null;
+        let isVoiceMode = localStorage.getItem('oms_voiceMode') === 'true';
+        let voiceLanguage = localStorage.getItem('oms_voiceLanguage') || 'en';
+
+        const el = {
+            loadingOverlay: document.getElementById('loadingOverlay'),               
+            loadingText: document.getElementById('loadingText'),                     
+            appContainer: document.getElementById('app-container'), 
+            appTitle: document.getElementById("appTitle"), 
+            scanOrderDescription: document.getElementById("scanOrderDescription"), 
+            uniqueOrderCountLabel: document.getElementById("uniqueOrderCountLabel"), 
+            orderScanInput: document.getElementById("orderScanInput"), 
+            addOrderBarcodeBtn: document.getElementById("addOrderBarcodeBtn"), 
+            statusMessage: document.getElementById("statusMessage"), 
+            scannedListHeader: document.getElementById("scannedListHeader"), 
+            scannedOrderBarcodesList: document.getElementById("scannedOrderBarcodesList"), 
+            noOrderBarcodesMessage: document.getElementById("noOrderBarcodesMessage"), 
+            orderListContainer: document.getElementById("orderListContainer"), 
+            returnToTodayBtn: document.getElementById("returnToTodayBtn"), 
+            exportTitle: document.getElementById("exportTitle"), 
+            printScannedOrderBtn: document.getElementById("printScannedOrderBtn"), 
+            downloadCsvBtn: document.getElementById("downloadCsvBtn"), 
+            loadPreviousOrdersTitle: document.getElementById("loadPreviousOrdersTitle"), 
+            autoSaveStatus: document.getElementById("autoSaveStatus"), 
+            searchByDateLabel: document.getElementById("searchByDateLabel"), 
+            searchByDate: document.getElementById("searchByDate"), 
+            resetDateFilterBtn: document.getElementById("resetDateFilterBtn"), 
+            savedSessionsSelect: document.getElementById("savedSessionsSelect"), 
+            loadSelectedSessionBtn: document.getElementById("loadSelectedSessionBtn"), 
+            liveClock: document.getElementById("live-clock"), 
+            saveToSheetBtn: document.getElementById('saveToSheetBtn'), 
+            saveBtnText: document.getElementById('saveBtnText'), 
+            saveBtnSpinner: document.getElementById('saveBtnSpinner'), 
+            sheetStatus: document.getElementById('sheetStatus'), 
+            liveSessionDisplay: document.getElementById('liveSessionDisplay'), 
+            liveSessionName: document.getElementById('liveSessionName'), 
+            manualSaveBtn: document.getElementById('manualSaveBtn'), 
+            manualSaveBtnText: document.getElementById('manualSaveBtnText'), 
+            manualSaveBtnSpinner: document.getElementById('manualSaveBtnSpinner'), 
+            barcodeSearchInput: document.getElementById('barcodeSearchInput'), 
+            barcodeSearchBtn: document.getElementById('barcodeSearchBtn'), 
+            barcodeSearchResult: document.getElementById('barcodeSearchResult'),
+            openCameraBtn: document.getElementById('openCameraBtn'), 
+            connectionStatus: document.getElementById('connectionStatus'),
+            networkIcon: document.getElementById('networkIcon'),
+            networkText: document.getElementById('networkText'),
+            animatedCounter: document.getElementById('animatedCounter'),
+            printArea: document.getElementById('print-area'),
+            openRecycleBinBtn: document.getElementById('openRecycleBinBtn'),
+            recycleBinCount: document.getElementById('recycleBinCount'),
+            recycleBinModal: document.getElementById('recycle-bin-modal'),
+            closeRecycleBinBtn: document.getElementById('closeRecycleBinBtn'),
+            recycleBinList: document.getElementById('recycleBinList'),
+            noRecycleItems: document.getElementById('noRecycleItems'),
+            restoreSelectedBtn: document.getElementById('restoreSelectedBtn'),
+            touchLockBtn: document.getElementById('touchLockBtn'),
+            touchLockOverlay: document.getElementById('touchLockOverlay'),
+            lockIconOpen: document.getElementById('lockIconOpen'),
+            lockIconClosed: document.getElementById('lockIconClosed'),
+            confettiContainer: document.getElementById('confetti-container'),
+            mainContentWrapper: document.querySelector('.main-content-wrapper'),
+            audioToggle: document.getElementById('audioToggle'),
+            voiceLangSelector: document.getElementById('voiceLangSelector'),
+            langEnBtn: document.getElementById('langEnBtn'),
+            langSiBtn: document.getElementById('langSiBtn'),
+            // Elements for Progress Bar & CSV
+            csvFileInput: document.getElementById('csvFileInput'),
+            uploadCsvBtn: document.getElementById('uploadCsvBtn'),
+            segmentedProgressBar: document.getElementById('segmentedProgressBar'),
+            targetText: document.getElementById('targetText'),
+            pendingText: document.getElementById('pendingText'),
+            progressText: document.getElementById('progressText')
+        };
+
+        function setInitialTexts() { 
+            el.appTitle.textContent = "Order Management System"; 
+            el.scanOrderDescription.textContent = "Scan order items for today's session."; 
+            el.uniqueOrderCountLabel.textContent = "Total Scanned"; 
+            el.addOrderBarcodeBtn.textContent = "Add"; 
+            el.returnToTodayBtn.textContent = "Return to Today's Session"; 
+            el.exportTitle.textContent = "Export & Save"; 
+            el.printScannedOrderBtn.textContent = "Print Viewed List (A4)"; 
+            el.downloadCsvBtn.textContent = "Download Viewed List (CSV)"; 
+            el.loadPreviousOrdersTitle.textContent = "View Previous Sessions"; 
+            el.searchByDateLabel.textContent = "Filter by Date"; 
+            el.resetDateFilterBtn.textContent = "Reset"; 
+            el.loadSelectedSessionBtn.textContent = "View"; 
+            el.orderScanInput.placeholder = "Barcode number..."; 
+            el.savedSessionsSelect.innerHTML = `<option value="">Loading...</option>`; 
+            el.manualSaveBtnText.textContent = "Save Current Session"; 
+        }
+        
+        function showLoading(text = "Loading...") { el.loadingText.textContent = text; el.loadingOverlay.style.display = 'flex'; }
+        function hideLoading() { el.loadingOverlay.style.display = 'none'; }
+        
+        function showCompletionAnimation() {
+            const container = el.confettiContainer;
+            if (!container) return;
+            const milestoneAudio = document.getElementById('milestoneSound');
+            if (milestoneAudio) { milestoneAudio.pause(); milestoneAudio.currentTime = 0; milestoneAudio.play().catch(e => console.error("Audio Play Error", e)); }
+            Swal.fire({ title: 'Woohoo!', text: `${MILESTONE_COUNT} items reached! Keep going!`, icon: 'success', toast: true, position: 'top', showConfirmButton: false, timer: 2000 });
+            container.style.display = 'block'; container.innerHTML = '';
+            const colors = ['#ffcc00', '#ff0066', '#33ccff', '#99ff33', '#f0f0f0'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div'); confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.setProperty('--x-start', `${Math.random() * 100 - 50}vw`); confetti.style.setProperty('--y-start', `-${Math.random() * 50}vh`);
+                confetti.style.setProperty('--x-end', `${Math.random() * 150 - 75}vw`); confetti.style.setProperty('--y-end', `${150 + Math.random() * 50}vh`);
+                confetti.style.animationDelay = `${Math.random() * 0.5}s`; confetti.style.animationDuration = `${2 + Math.random() * 1.5}s`;
+                container.appendChild(confetti);
+            }
+            setTimeout(() => { container.innerHTML = ''; container.style.display = 'none'; }, 3500); 
+        }
+
+        // --- CSV UPLOAD LOGIC ---
+        el.uploadCsvBtn.addEventListener('click', () => el.csvFileInput.click());
+        el.csvFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            showLoading("Uploading Target...");
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                const text = event.target.result;
+                const rawRows = text.split('\n').map(row => row.trim().replace(/['"]/g, ''));
+                const extractedBarcodes = rawRows.filter(row => row && row.toLowerCase() !== 'barcode' && row.toLowerCase() !== 'id');
+
+                if(extractedBarcodes.length === 0) {
+                    hideLoading();
+                    Swal.fire('Error', 'No valid barcodes found in CSV.', 'error');
+                    return;
+                }
+
+                try {
+                    await apiCall('setDailyTarget', { sessionId: currentSessionId, targetBarcodes: extractedBarcodes });
+                    targetBarcodes = extractedBarcodes;
+                    updateUiFromState();
+                    hideLoading();
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `Target set to ${extractedBarcodes.length} items.`, showConfirmButton: false, timer: 2500 });
+                } catch (err) {
+                    hideLoading();
+                    Swal.fire('Error', 'Failed to save target to cloud.', 'error');
+                }
+                el.csvFileInput.value = "";
+            };
+            reader.onerror = function() {
+                hideLoading();
+                Swal.fire('Error', 'Could not read CSV file.', 'error');
+            }
+            reader.readAsText(file);
+        });
+
+        // --- PROGRESS DASHBOARD UPDATE LOGIC ---
+        function updateProgressDashboard() {
+            // We read array backwards so it visually draws from oldest scan to newest scan
+            const chronologicalScans = [...currentlyViewingBarcodes].reverse();
+            const targetCount = targetBarcodes.length || 0;
+            let validCount = 0;
+            let invalidCount = 0;
+
+            let segmentsHtml = '';
+            // If they scan more than target, the bar resizes to fit the extra scans.
+            const totalSlots = Math.max(targetCount, chronologicalScans.length);
+
+            if (totalSlots === 0) {
+                el.segmentedProgressBar.innerHTML = '';
+                el.targetText.textContent = `🎯 Target: 0`;
+                el.pendingText.textContent = `⏳ Pending: 0`;
+                el.progressText.textContent = `0%`;
+                return;
+            }
+
+            const segmentWidth = 100 / totalSlots;
+
+            chronologicalScans.forEach(barcode => {
+                let isTarget = targetCount === 0 ? false : targetBarcodes.includes(barcode);
+                if (isTarget) validCount++; else invalidCount++;
+                
+                let colorClass = isTarget ? 'bg-blue-500' : 'bg-red-500';
+                segmentsHtml += `<div style="width: ${segmentWidth}%" class="h-full ${colorClass} border-r border-white/20 last:border-0" title="${barcode}"></div>`;
+            });
+
+            el.segmentedProgressBar.innerHTML = segmentsHtml;
+
+            el.targetText.textContent = `🎯 Target: ${targetCount}`;
+            let pending = targetCount - validCount;
+            if(pending < 0) pending = 0;
+            el.pendingText.textContent = `⏳ Pending: ${pending}`;
+
+            let percentage = targetCount > 0 ? Math.round((validCount / targetCount) * 100) : 0;
+            if(percentage > 100) percentage = 100;
+            el.progressText.textContent = `${percentage}%`;
+        }
+
+
+        // --- SYNCED SCAN FUNCTION ---
+        function handleOrderScanAddBarcode(scannedCode = null) {
+            const barcode = scannedCode || el.orderScanInput.value.trim();
+            if (barcode === "") { if(!scannedCode) el.orderScanInput.focus(); return false; }
+            
+            let isSuccess = false;
+
+            if (scannedBarcodes.includes(barcode)) {
+                showStatusMessage(`Already Scanned: ${barcode}`, "error");
+                const errorAudio = document.getElementById('errorSound');
+                if (errorAudio) { errorAudio.pause(); errorAudio.currentTime = 0; errorAudio.play().catch(console.error); }
+                isSuccess = false;
+            } else {
+                scannedBarcodes.unshift(barcode); 
+                currentlyViewingBarcodes = scannedBarcodes; 
+                
+                // Show red status toast if scanned barcode is not in target (only if target exists)
+                if(targetBarcodes.length > 0 && !targetBarcodes.includes(barcode)) {
+                    showStatusMessage(`Out of Target: ${barcode}`, "error");
+                } else {
+                    showStatusMessage(`Success: ${barcode}`, "success");
+                }
+
+                if (isVoiceMode) {
+                    speakCount(scannedBarcodes.length);
+                } else {
+                    const successAudio = document.getElementById('successSound');
+                    if (successAudio) { successAudio.pause(); successAudio.currentTime = 0; successAudio.play().catch(console.error); }
+                }
+                
+                if (scannedBarcodes.length > 0 && scannedBarcodes.length % MILESTONE_COUNT === 0) {
+                     showCompletionAnimation();
+                }
+
+                updateUiFromState();
+                autoSaveSession();
+                isSuccess = true;
+            }
+            
+            if(!scannedCode) {
+                el.orderScanInput.value = "";
+                el.orderScanInput.focus();
+            }
+            return isSuccess;
+        }
+
+        // --- VOICE LOGIC ---
+        function speakCount(number) {
+            window.speechSynthesis.cancel();
+            let textToSpeak = number.toString();
+            let langCode = 'en-US';
+            if (voiceLanguage === 'si') {
+                textToSpeak = getSinhalaNumberText(number);
+                langCode = 'si-LK'; 
+            }
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            const voices = window.speechSynthesis.getVoices();
+            let selectedVoice = null;
+            if (voiceLanguage === 'si') {
+                 utterance.lang = 'si-LK';
+            } else {
+                 selectedVoice = voices.find(v => v.lang.includes('en') && (v.name.includes('Google') || v.name.includes('Female') || v.name.includes('Zira')));
+                 if (!selectedVoice) selectedVoice = voices.find(v => v.lang.includes('en'));
+                 if (selectedVoice) utterance.voice = selectedVoice;
+            }
+            utterance.rate = 1.0; utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function getSinhalaNumberText(n) {
+            if (n === 0) return "Binduwa";
+            if (n > 999) return n.toString(); 
+            const units = ["", "Eka", "Deka", "Thuna", "Hathara", "Paha", "Haya", "Hatha", "Ata", "Namaya"];
+            const teens = ["Dahaya", "Ekolaha", "Dolaha", "Dahathuna", "Dahahathara", "Pahalawa", "Dahaseya", "Dahahatha", "Daha ata", "Dahanamaya"];
+            const tens = ["", "Dahaya", "Vissa", "Thiha", "Hathaliha", "Panaha", "Heta", "Heththa", "Asuwa", "Anuwa"];
+            const tensCombining = ["", "Daha", "Visi", "This", "Hathalis", "Panas", "Heta", "Heththi", "Asu", "Anu"];
+            let text = "";
+            if (n >= 100) {
+                const h = Math.floor(n / 100);
+                if (h === 1) text += "Eka Siiya "; else if (h === 2) text += "De Siiya "; else if (h === 3) text += "Thun Siiya "; else if (h === 4) text += "Hara Siiya "; else text += units[h] + " Siiya ";
+                n %= 100; if (n === 0) return text.trim();
+            }
+            if (n < 10) { text += units[n]; } else if (n >= 10 && n < 20) { text += teens[n - 10]; } else {
+                const t = Math.floor(n / 10);
+                const u = n % 10;
+                if (u === 0) { text += tens[t]; } else { text += tensCombining[t] + " " + units[u]; }
+            }
+            return text.trim();
+        }
+
+        function toggleAudioMode() {
+            isVoiceMode = el.audioToggle.checked;
+            localStorage.setItem('oms_voiceMode', isVoiceMode);
+            if (isVoiceMode) { el.voiceLangSelector.classList.remove('hidden'); updateLangButtons(); } 
+            else { el.voiceLangSelector.classList.add('hidden'); }
+        }
+        
+        window.setVoiceLang = function(lang) { 
+            voiceLanguage = lang; 
+            localStorage.setItem('oms_voiceLanguage', lang);
+            updateLangButtons(); 
+        }
+        
+        function updateLangButtons() {
+            if (voiceLanguage === 'en') {
+                el.langEnBtn.classList.add('active'); el.langEnBtn.classList.remove('inactive');
+                el.langSiBtn.classList.remove('active'); el.langSiBtn.classList.add('inactive');
+            } else {
+                el.langSiBtn.classList.add('active'); el.langSiBtn.classList.remove('inactive');
+                el.langEnBtn.classList.remove('active'); el.langEnBtn.classList.add('inactive');
+            }
+        }
+
+        function updateUiFromState() {
+            // SYNC TO LOCAL STORAGE FOR CAMERA APP
+            if (currentlyViewingSessionId === currentSessionId) {
+                localStorage.setItem('oms_scannedBarcodes', JSON.stringify(scannedBarcodes));
+            }
+
+            const currentCount = currentlyViewingBarcodes.length;
+            if (FlipCounter.element) FlipCounter.update(currentCount); 
+            updateRecycleBinUi();
+            updateProgressDashboard();
+            
+            el.scannedOrderBarcodesList.innerHTML = "";
+            const isViewingToday = currentlyViewingSessionId === currentSessionId;
+            
+            // Header is already styled correctly in HTML, just changing text if viewing older
+            if(isViewingToday) {
+                el.scannedListHeader.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    Scanned Today
+                `;
+            } else {
+                el.scannedListHeader.innerHTML = `Viewing Session: ${currentlyViewingSessionId.replace('SESSION-','')}`;
+            }
+
+            el.noOrderBarcodesMessage.style.display = currentCount > 0 ? 'none' : 'block';
+            el.returnToTodayBtn.style.display = isViewingToday ? 'none' : 'block';
+            el.orderScanInput.disabled = !isViewingToday; el.addOrderBarcodeBtn.disabled = !isViewingToday; 
+            el.orderScanInput.placeholder = isViewingToday ? "Barcode number..." : "Viewing past session...";
+
+            if (currentCount > 0) {
+                currentlyViewingBarcodes.forEach((barcode, index) => {
+                    const li = document.createElement("li");
+                    li.style.animation = `slideInFromLeft 0.5s ease-out forwards`;
+                    const scanNumber = currentCount - index; 
+                    if(isViewingToday) { 
+                        li.className = "flex items-center justify-between p-2 rounded-md text-base bg-white shadow-sm border border-gray-200 text-gray-800";
+                        li.innerHTML = `<div class='flex items-center'><span class="font-semibold text-primary w-12 text-left">#${scanNumber}</span><span>${barcode}</span></div>`;
+                        const deleteBtn = document.createElement('button'); deleteBtn.textContent = "Delete"; deleteBtn.className = "btn btn-danger px-3 py-1 text-xs rounded-md font-semibold"; 
+                        deleteBtn.onclick = () => handleDeleteSingleBarcode(index); 
+                        li.appendChild(deleteBtn);
+                    } else {
+                        li.className = "flex items-center p-2 text-gray-500"; li.textContent = `#${scanNumber}. ${barcode}`;
+                    }
+                    el.scannedOrderBarcodesList.appendChild(li);
+                });
+                el.orderListContainer.scrollTop = 0;
+            }
+            el.liveSessionName.textContent = `For ${currentSessionId.replace('SESSION-', '')}`;
+            el.liveSessionDisplay.classList.remove('hidden');
+            updateNetworkStatus();
+            if (isViewingToday && !isTouchLocked) el.orderScanInput.focus();
+        }
+
+        async function initializeApp() {
+            showLoading("Initializing System...");
+            setInitialTexts(); 
+            currentSessionId = getTodaySessionId(); 
+            currentlyViewingSessionId = currentSessionId;
+            document.title = "World Out Fashion - OMS";
+            
+            FlipCounter.initialize(0); 
+            updateClock(); setInterval(updateClock, 1000); 
+            loadRecycleBin(); 
+            
+            // Set Initial Voice State
+            el.audioToggle.checked = isVoiceMode;
+            if(isVoiceMode) { el.voiceLangSelector.classList.remove('hidden'); updateLangButtons(); }
+
+            el.addOrderBarcodeBtn.addEventListener("click", () => handleOrderScanAddBarcode());
+            el.returnToTodayBtn.addEventListener("click", returnToTodayView);
+            el.manualSaveBtn.addEventListener("click", handleManualSave);
+            el.loadSelectedSessionBtn.addEventListener("click", loadSelectedSession);
+            el.searchByDate.addEventListener("input", filterSessionsByDate);
+            el.resetDateFilterBtn.addEventListener("click", () => { el.searchByDate.value = ""; filterSessionsByDate(); });
+            el.barcodeSearchBtn.addEventListener("click", handleBarcodeSearch);
+            el.barcodeSearchInput.addEventListener("keypress", (e) => { if (e.key === 'Enter') handleBarcodeSearch(); }); 
+            el.saveToSheetBtn.addEventListener("click", saveDataToGoogleSheet);
+            el.printScannedOrderBtn.addEventListener("click", printScannedOrder);
+            el.downloadCsvBtn.addEventListener("click", downloadCsv);
+            el.openRecycleBinBtn.addEventListener("click", openRecycleBin);
+            el.closeRecycleBinBtn.addEventListener("click", closeRecycleBin);
+            el.restoreSelectedBtn.addEventListener("click", handleRestoreSelected);
+            el.touchLockBtn.addEventListener("click", handleTouchLockToggle);
+            el.audioToggle.addEventListener('change', toggleAudioMode);
+
+            // OPEN CAMERA IN NEW WINDOW
+            el.openCameraBtn.addEventListener("click", () => {
+                localStorage.setItem('oms_scannedBarcodes', JSON.stringify(scannedBarcodes));
+                window.open('camera.html', 'cameraWindow', 'width=450,height=800,scrollbars=no,resizable=no');
+            });
+
+            // LISTEN FOR CHANGES FROM CAMERA WINDOW
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'oms_scannedBarcodes' && e.newValue) {
+                    const newBarcodes = JSON.parse(e.newValue);
+                    if (JSON.stringify(newBarcodes) !== JSON.stringify(scannedBarcodes)) {
+                        scannedBarcodes = newBarcodes;
+                        currentlyViewingBarcodes = scannedBarcodes;
+                        updateUiFromState();
+                    }
+                }
+            });
+
+            window.addEventListener('online', updateNetworkStatus);
+            window.addEventListener('offline', updateNetworkStatus);
+            updateNetworkStatus(); 
+            
+            // Fetch daily target and scanned data
+            await reloadTodaysData();
+            await loadAllSessions();
+            
+            updateUiFromState();
+            startPollingCount();
+            hideLoading();
+        }
+
+        function startPollingCount() {
+            if (countUpdateInterval) clearInterval(countUpdateInterval);
+            countUpdateInterval = setInterval(() => {
+                if (navigator.onLine && currentlyViewingSessionId === currentSessionId) {
+                    fetchTodayCount(true); 
+                }
+            }, 3000);
+        }
+
+        function stopPollingCount() {
+            if (countUpdateInterval) { clearInterval(countUpdateInterval); countUpdateInterval = null; }
+        }
+
+        let barcodeBuffer = '';
+        let barcodeTimer = null;
+        document.addEventListener('keydown', (e) => {
+            if (el.loadingOverlay.style.display !== 'none') return;
+            if (document.activeElement === el.orderScanInput) {
+                if (e.key === 'Enter') { e.preventDefault(); handleOrderScanAddBarcode(); }
+                return; 
+            }
+            if (['INPUT','SELECT','TEXTAREA','BUTTON'].includes(document.activeElement.tagName)) return;
+
+            clearTimeout(barcodeTimer);
+            if (e.key === 'Enter') {
+                e.preventDefault(); 
+                if (barcodeBuffer.length > 0) {
+                    el.orderScanInput.value = barcodeBuffer;
+                    handleOrderScanAddBarcode();
+                    barcodeBuffer = ''; 
+                }
+                return;
+            }
+            if (e.key.length === 1 && e.key.match(/[a-zA-Z0-9]/)) {
+                barcodeBuffer += e.key;
+                e.preventDefault(); 
+                barcodeTimer = setTimeout(() => { barcodeBuffer = ''; }, 50);
+            }
+        });
+
+        const FlipCounter = {
+            element: null, value: 0, digitContainers: [],
+            initialize: function(initialValue = 0) {
+                this.element = el.animatedCounter;
+                this.element.classList.add('flip-counter');
+                this.update(initialValue, true);
+            },
+            update: function(newValue, noAnimation = false) {
+                if (newValue < 0) newValue = 0;
+                const oldValueStr = String(this.value).padStart(4, '0');
+                this.value = newValue;
+                const newValueStr = String(newValue > 9999 ? 9999 : newValue).padStart(4, '0'); 
+                while (this.digitContainers.length < 4) {
+                    const container = document.createElement('div');
+                    container.className = 'flip-digit-container';
+                    container.innerHTML = `<div class="flip-digit current">0</div><div class="flip-digit next">0</div>`;
+                    this.element.appendChild(container);
+                    this.digitContainers.push(container);
+                }
+                for (let i = 0; i < 4; i++) {
+                    const newDigit = newValueStr[i];
+                    const oldDigit = oldValueStr[i];
+                    const container = this.digitContainers[i];
+                    if (newDigit !== oldDigit || noAnimation) this.animateDigit(container, oldDigit, newDigit, noAnimation);
+                }
+            },
+            blinkSuccess: function() {
+                el.animatedCounter.classList.add('success-blink');
+                setTimeout(() => { el.animatedCounter.classList.remove('success-blink'); }, 1000); 
+            },
+            animateDigit: function(container, oldDigit, newDigit, noAnimation) {
+                const currentElement = container.querySelector('.current');
+                const nextElement = container.querySelector('.next');
+                if (noAnimation) {
+                    currentElement.textContent = newDigit; nextElement.textContent = newDigit; currentElement.style.transform = 'translateY(0%)'; return;
+                }
+                nextElement.textContent = newDigit;
+                currentElement.style.transition = 'none'; nextElement.style.transition = 'none';
+                currentElement.style.transform = 'translateY(0%)'; nextElement.style.transform = 'translateY(100%)';
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        currentElement.style.transition = 'transform 0.5s ease-out'; nextElement.style.transition = 'transform 0.5s ease-out';
+                        currentElement.style.transform = 'translateY(-100%)'; nextElement.style.transform = 'translateY(0%)';      
+                        setTimeout(() => {
+                            currentElement.textContent = newDigit;
+                            currentElement.style.transition = 'none'; currentElement.style.transform = 'translateY(0%)';
+                            nextElement.style.transition = 'none'; nextElement.style.transform = 'translateY(100%)';
+                        }, 500); 
+                    });
+                });
+            }
+        };
+
+        function updateClock() { el.liveClock.textContent = new Date().toLocaleString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: !0 }); }
+        function showStatusMessage(t, e) { el.statusMessage.textContent = t; el.statusMessage.className = "status-message rounded-lg text-center font-semibold"; el.statusMessage.classList.add("success" === e ? "bg-green-status" : "bg-red-status", "show"); setTimeout(() => el.statusMessage.classList.remove("show"), 2500); }
+        function getTodaySessionId() { const today = new Date(); return `SESSION-${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`; }
+        
+        async function apiCall(action, payload = {}) {
+            if (!navigator.onLine && action !== 'getSessionData' && action !== 'getAllSessions') throw new Error("Offline");
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ action, ...payload }) 
+                });
+                if (!response.ok) throw new Error(`Network response error: ${response.status}`);
+                const data = await response.json();
+                if (data.status !== 'success') throw new Error(data.message || 'Error');
+                return data;
+            } catch (error) { console.error(`API Call Failed:`, error); throw error; }
+        }
+        
+        function updateNetworkStatus() {
+            const isOnline = navigator.onLine;
+            if (isOnline) { el.networkIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 icon-online" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.447 18.013v0c.34-.146.732-.23 1.144-.23h4.818c.412 0 .804.084 1.144.23l.115.05A7.994 7.994 0 0012 4a7.994 7.994 0 00-5.679 2.373L7.15 7.189c.34-.146.732-.23 1.144-.23h7.411c.412 0 .804.084 1.144.23l.23-.23A7.994 7.994 0 0012 4a7.994 7.994 0 00-5.679 2.373zM5 12a7 7 0 0114 0M3 18a9 9 0 0118 0" /></svg>`; el.networkText.textContent = "Online"; el.networkText.className = "font-bold text-success-hover"; } 
+            else { el.networkIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 icon-offline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 011.414 0l4.242 4.242m-9.898-9.9l9.9 9.9" /></svg>`; el.networkText.textContent = "Offline"; el.networkText.className = "font-bold text-danger-hover"; }
+            el.saveToSheetBtn.disabled = !isOnline;
+            el.manualSaveBtn.disabled = !isOnline;
+        }
+
+        function handleTouchLockToggle(event) {
+            if (event && event.type === 'click' && event.target !== el.touchLockBtn && !el.touchLockBtn.contains(event.target)) return;
+            isTouchLocked = !isTouchLocked;
+            if (isTouchLocked) {
+                el.lockIconOpen.classList.add('hidden'); el.lockIconClosed.classList.remove('hidden');
+                el.touchLockOverlay.classList.add('locked'); el.touchLockBtn.classList.remove('btn-secondary'); el.touchLockBtn.classList.add('btn-danger');
+                el.orderScanInput.blur(); 
+                Swal.fire({ toast: true, position: 'top-right', icon: 'warning', title: 'Touch Locked', showConfirmButton: false, timer: 1500 });
+            } else {
+                el.lockIconOpen.classList.remove('hidden'); el.lockIconClosed.classList.add('hidden');
+                el.touchLockOverlay.classList.remove('locked'); el.touchLockBtn.classList.remove('btn-danger'); el.touchLockBtn.classList.add('btn-secondary');
+                Swal.fire({ toast: true, position: 'top-right', icon: 'success', title: 'Touch Unlocked', showConfirmButton: false, timer: 1500 });
+                el.orderScanInput.focus();
+            }
+        }
+
+        function loadRecycleBin() { try { recycleBin = JSON.parse(localStorage.getItem('recycleBin')) || []; } catch (e) { recycleBin = []; } }
+        function saveRecycleBin() { localStorage.setItem('recycleBin', JSON.stringify(recycleBin)); updateRecycleBinUi(); }
+        function updateRecycleBinUi() {
+            el.recycleBinCount.textContent = `Recycle Bin (${recycleBin.length})`;
+            el.recycleBinList.innerHTML = ''; el.noRecycleItems.style.display = recycleBin.length > 0 ? 'none' : 'block'; el.restoreSelectedBtn.disabled = recycleBin.length === 0;
+            recycleBin.forEach((item, index) => {
+                const li = document.createElement("li");
+                li.className = "flex items-center justify-between p-2 rounded-md text-sm bg-white shadow-sm border border-gray-200 text-gray-700";
+                li.innerHTML = `<input type='checkbox' value='${item.barcode}' id='rb-item-${index}' class='mr-3 h-4 w-4 rounded'><label for='rb-item-${index}' class='flex-grow cursor-pointer'><span class="font-semibold">${item.barcode}</span><span class="text-xs text-secondary ml-2"> (Deleted: ${new Date(item.deletedAt).toLocaleTimeString()})</span></label>`;
+                el.recycleBinList.appendChild(li);
+            });
+        }
+        function openRecycleBin() { loadRecycleBin(); updateRecycleBinUi(); el.recycleBinModal.style.display = 'flex'; }
+        function closeRecycleBin() { el.recycleBinModal.style.display = 'none'; }
+        
+        function handleRestoreSelected() {
+            const selected = Array.from(el.recycleBinList.querySelectorAll('input:checked')).map(cb => cb.value);
+            if (selected.length === 0) return Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'No items selected!', showConfirmButton: false, timer: 1500 });
+            selected.forEach(barcode => { if (!scannedBarcodes.includes(barcode)) scannedBarcodes.unshift(barcode); });
+            recycleBin = recycleBin.filter(item => !selected.includes(item.barcode));
+            saveRecycleBin();
+            returnToTodayView(); closeRecycleBin(); autoSaveSession();
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `${selected.length} item(s) restored!`, showConfirmButton: false, timer: 2000 });
+        }
+        
+        function handleDeleteSingleBarcode(indexToDelete) {
+            const barcodeToDelete = currentlyViewingBarcodes[indexToDelete];
+            Swal.fire({ 
+                title: 'Are you sure?', text: `Move ${barcodeToDelete} to Recycle Bin?`, icon: 'warning', 
+                showCancelButton: true, confirmButtonColor: 'var(--danger)', confirmButtonText: 'Yes, Move!', cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) { 
+                    recycleBin.unshift({ barcode: barcodeToDelete, deletedAt: new Date().toISOString() });
+                    saveRecycleBin(); 
+                    scannedBarcodes.splice(indexToDelete, 1); 
+                    currentlyViewingBarcodes = scannedBarcodes; 
+                    updateUiFromState(); 
+                    autoSaveSession(); 
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Moved to Recycle Bin', showConfirmButton: false, timer: 1500 });
+                } 
+            });
+        }
+        
+        function returnToTodayView() { currentlyViewingSessionId = currentSessionId; currentlyViewingBarcodes = [...scannedBarcodes]; updateUiFromState(); }
+        
+        async function loadSelectedSession() {
+            const sessionId = el.savedSessionsSelect.value;
+            if (!sessionId) { return Swal.fire({ title: "Please select a session.", icon: 'info' }); }
+            el.loadSelectedSessionBtn.disabled = true; el.loadSelectedSessionBtn.textContent = "Loading...";
+            try { 
+                const data = await apiCall("getSessionData", { sessionId: sessionId }); 
+                currentlyViewingSessionId = sessionId; 
+                currentlyViewingBarcodes = data.session.data.barcodes || []; 
+                targetBarcodes = data.session.data.targetBarcodes || []; // Show target history for old sessions
+                updateUiFromState(); 
+            } catch (error) { 
+                 Swal.fire("Load Error", "Could not load session data.", "error");
+                returnToTodayView(); 
+            } finally { el.loadSelectedSessionBtn.disabled = false; el.loadSelectedSessionBtn.textContent = "View"; }
+        }
+
+        async function handleBarcodeSearch() {
+            const barcodeToSearch = el.barcodeSearchInput.value.trim();
+            if (!barcodeToSearch) { el.barcodeSearchResult.textContent = "Enter barcode."; el.barcodeSearchResult.style.color = "var(--warning)"; return; }
+            el.barcodeSearchBtn.disabled = true; el.barcodeSearchResult.textContent = "Searching..."; el.barcodeSearchResult.style.color = "var(--info)";
+            try { 
+                const data = await apiCall("searchBarcode", { barcode: barcodeToSearch });
+                if (data.found) { el.barcodeSearchResult.textContent = `Found: ${data.date}`; el.barcodeSearchResult.style.color = "var(--success)"; } 
+                else { el.barcodeSearchResult.textContent = "Not found."; el.barcodeSearchResult.style.color = "var(--danger)"; }
+            } catch (error) { el.barcodeSearchResult.textContent = "Error."; el.barcodeSearchResult.style.color = "var(--danger)"; } 
+            finally { el.barcodeSearchBtn.disabled = false; }
+        }
+        
+        async function handleManualSave() {
+            el.manualSaveBtn.disabled = true; el.manualSaveBtnText.classList.add('hidden'); el.manualSaveBtnSpinner.classList.remove('hidden');
+            try { await autoSaveSession(true); await fetchTodayCount(); } catch (error) {} 
+            finally { el.manualSaveBtn.disabled = !navigator.onLine; el.manualSaveBtnText.classList.remove('hidden'); el.manualSaveBtnSpinner.classList.add('hidden'); }
+        }
+        
+        async function autoSaveSession(isManual = false) {
+            if (!navigator.onLine) {
+                el.autoSaveStatus.textContent = '✗ Offline'; el.autoSaveStatus.style.color = 'var(--danger)'; el.autoSaveStatus.classList.add("show"); 
+                setTimeout(() => { el.autoSaveStatus.classList.remove("show"); el.autoSaveStatus.textContent = '✓ Saved'; el.autoSaveStatus.style.color = 'var(--success)'; }, 3000);
+                return;
+            }
+            try { 
+                await apiCall("saveSession", { sessionId: currentSessionId, barcodes: scannedBarcodes });
+                FlipCounter.blinkSuccess();
+                if (isManual) Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Saved!', showConfirmButton: false, timer: 1500 }); 
+                else { 
+                    el.autoSaveStatus.classList.remove("show"); el.autoSaveStatus.textContent = '✓ Saved'; el.autoSaveStatus.style.color = 'var(--success)'; el.autoSaveStatus.classList.add("show"); 
+                    setTimeout(() => { el.autoSaveStatus.classList.remove("show") }, 2000); 
+                }
+            } catch (error) { 
+                el.autoSaveStatus.textContent = '✗ Failed'; el.autoSaveStatus.style.color = 'var(--danger)'; el.autoSaveStatus.classList.add("show"); 
+                setTimeout(() => { el.autoSaveStatus.classList.remove("show"); el.autoSaveStatus.textContent = '✓ Saved'; el.autoSaveStatus.style.color = 'var(--success)'; }, 3000); 
+            }
+        }
+        
+        function printScannedOrder() {
+            if (currentlyViewingBarcodes.length === 0) return Swal.fire({ title: "No items.", icon: "info" });
+            const barcodes = currentlyViewingBarcodes;
+            const itemsToPrint = [...barcodes].reverse(); 
+            const totalItems = itemsToPrint.length;
+            const ITEMS_PER_PAGE = 200; 
+            const ITEMS_PER_COLUMN = 40; 
+            const COLUMNS_PER_PAGE = 5;
+
+            el.printArea.innerHTML = "";
+            let printContentHtml = "";
+
+            for (let i = 0; i < totalItems; i += ITEMS_PER_PAGE) {
+                const pageItems = itemsToPrint.slice(i, i + ITEMS_PER_PAGE);
+                const isLastPage = (i + ITEMS_PER_PAGE) >= totalItems;
+                printContentHtml += `<div class="print-page"><div class="print-watermark-overlay"><img src="logo.png" alt="Watermark Logo" onerror="this.style.display='none'"></div><div class="print-header"><div class="print-title-group"><img src="logo.png" class="company-logo" onerror="this.style.display='none'"><h1 class="company-name-print">World Out Fashion</h1></div><p class="print-date">Date: ${new Date().toLocaleString('en-US')}</p></div><div class="print-list-container">`;
+                for (let col = 0; col < COLUMNS_PER_PAGE; col++) {
+                     const startIdx = col * ITEMS_PER_COLUMN;
+                     if(startIdx < pageItems.length) {
+                         printContentHtml += '<div class="print-column">';
+                         const endIdx = Math.min(startIdx + ITEMS_PER_COLUMN, pageItems.length);
+                         for(let j = startIdx; j < endIdx; j++) {
+                             const globalIndex = i + j + 1;
+                             printContentHtml += `<div>${globalIndex}. ${pageItems[j]}</div>`;
+                         }
+                         printContentHtml += '</div>';
+                     }
+                }
+                printContentHtml += `</div>`;
+                if (isLastPage) {
+                    printContentHtml += `<div class="footer-container"><div class="total-box">Total Qty: ${totalItems}</div><div class="signature-area"><div class="signature-line">Prepared By</div></div></div>`;
+                }
+                printContentHtml += `<div class="print-footer-watermark">© 2026 DesignVerse. All rights reserved. Crafted with passion in Minuwangoda, Sri Lanka.</div></div>`;
+            }
+            el.printArea.innerHTML = printContentHtml;
+            window.print();
+        }
+        
+        function downloadCsv(){
+            if(0===currentlyViewingBarcodes.length)return void Swal.fire({title:"No items.",icon:"info"});
+            const t=[...currentlyViewingBarcodes].reverse();
+            let e="No,Barcode\n"; t.forEach((t,a)=>{e+=`${a+1},"${t}"\n`});
+            const a=new Blob([e],{type:"text/csv;charset=utf-8;"}),s=document.createElement("a");
+            s.href=URL.createObjectURL(a),s.download=`scanned_order_${currentlyViewingSessionId}.csv`,s.click()
+        }
+        
+        function filterSessionsByDate(){
+            const t=el.searchByDate.value;
+            let e=allSessions.filter(e=>e.id!==currentSessionId);
+            t&&(e=e.filter(e=>{const a=new Date(e.createdAt).toISOString().split('T')[0];return a===t})),
+            el.savedSessionsSelect.innerHTML=`<option value="">Select a previous session</option>`,
+            e.sort((t,e)=>e.createdAt-t.createdAt).forEach(t=>{const e=document.createElement("option");e.value=t.id,e.textContent=t.name,el.savedSessionsSelect.appendChild(e)})
+        }
+        
+        function saveDataToGoogleSheet() { 
+            if (scannedBarcodes.length === 0) return Swal.fire("No Data", "No barcodes.", "warning"); 
+            if (!navigator.onLine) return Swal.fire("Offline", "Check connection.", "error");
+            el.saveToSheetBtn.disabled = true; el.saveBtnText.classList.add('hidden'); el.saveBtnSpinner.classList.remove('hidden'); 
+            el.sheetStatus.textContent = "Saving..."; el.sheetStatus.style.color = "var(--info)"; 
+            apiCall("saveData", { barcodes: [...scannedBarcodes].reverse(), sessionId: currentSessionId }).then(() => { 
+                el.sheetStatus.textContent = "Saved!"; el.sheetStatus.style.color = "var(--success)"; 
+                Swal.fire("Success!", "Data saved to daily sheet.", "success"); 
+            }).catch((error) => { el.sheetStatus.textContent = "Failed."; el.sheetStatus.style.color = "var(--danger)"; 
+            }).finally(() => { 
+                el.saveToSheetBtn.disabled = !navigator.onLine; 
+                el.saveBtnText.classList.remove('hidden'); el.saveBtnSpinner.classList.add('hidden'); 
+            }); 
+        }
+
+        async function fetchTodayCount(silent = false) {
+            if (!navigator.onLine) return;
+            try {
+                const data = await apiCall("getSessionData", { sessionId: currentSessionId });
+                const fetchedBarcodes = data.session.data.barcodes || [];
+                const fetchedTargets = data.session.data.targetBarcodes || [];
+                
+                scannedBarcodes = fetchedBarcodes;
+                targetBarcodes = fetchedTargets; // Sync target from server
+                
+                if (currentlyViewingSessionId === currentSessionId) {
+                     currentlyViewingBarcodes = [...scannedBarcodes];
+                     updateUiFromState(); 
+                }
+            } catch (error) {
+                // error handling ignored for silent polling
+            }
+        }
+
+        async function reloadTodaysData() {
+             try { 
+                 const data = await apiCall("getSessionData", { sessionId: currentSessionId }); 
+                 scannedBarcodes = data.session.data.barcodes || []; 
+                 targetBarcodes = data.session.data.targetBarcodes || []; 
+             } catch (error) { 
+                 scannedBarcodes = []; 
+                 targetBarcodes = [];
+             }
+            returnToTodayView();
+        }
+        
+        async function loadAllSessions() {
+             try { 
+                el.savedSessionsSelect.innerHTML = `<option value="">Loading previous sessions...</option>`;
+                const data = await apiCall("getAllSessions"); 
+                allSessions = data.sessions; 
+                filterSessionsByDate(); 
+            } catch (error) { el.savedSessionsSelect.innerHTML = `<option value="">Failed to load sessions (API Error)</option>`; }
+        }
+        
+        document.addEventListener("DOMContentLoaded", initializeApp);
+    </script>
+</body>
+</html>

@@ -48,7 +48,7 @@
             flex-grow: 1;
             width: 100%;
             padding: 1rem; 
-            padding-bottom: 90px; /* Space for fixed footer */
+            padding-bottom: 120px; /* Space for glassy sticky footer */
             max-width: 1200px; 
             pointer-events: auto;
             background: linear-gradient(-45deg, #e7f5ff, #f8f9fa, #e9ecef, #dee2e6);
@@ -107,7 +107,7 @@
         h1, h2 { color: var(--color-primary); }
         .text-secondary { color: var(--color-secondary); }
 
-        .btn { transition: background-color .2s, transform .1s, box-shadow .2s; border: none; }
+        .btn { transition: background-color .2s, transform .1s, box-shadow .2s; border: none; cursor: pointer; }
         .btn:active { transform: scale(.98); }
         .btn-primary { background-color: var(--color-primary); color: white; }
         .btn-primary:hover { background-color: var(--color-primary-hover); }
@@ -269,6 +269,17 @@
         #confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 60; display: none; }
         .confetti { position: absolute; width: 10px; height: 10px; background-color: #f0f0f0; opacity: 0; transform-origin: 50% 50%; animation: confetti-fall 3s linear infinite; }
         @keyframes confetti-fall { 0% { transform: translate3d(var(--x-start), var(--y-start), 0) rotate(0deg); opacity: 1; } 100% { transform: translate3d(var(--x-end), var(--y-end), 0) rotate(720deg); opacity: 0.2; } }
+        
+        /* Glassy Sticky Footer Effect */
+        #sticky-progress-footer {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+            bottom: 0;
+            padding-bottom: max(1rem, env(safe-area-inset-bottom));
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -298,7 +309,7 @@
     <!-- Confetti Container -->
     <div id="confetti-container"></div>
     
-    <!-- Main App Wrapper -->
+    <!-- Main App Wrapper (Directly opens to advanced) -->
     <div class="main-content-wrapper">
         <div id="app-container" class="card p-6 lg:p-8 rounded-2xl w-full no-print">
             
@@ -376,7 +387,7 @@
                     <!-- Status & Counter -->
                     <div class="p-6 bg-card-section rounded-xl border border-theme shadow-inner h-fit">
                         <div class="mb-4">
-                            <div id="connectionStatus" class="flex items-center justify-center gap-2 mb-2 p-2 rounded-lg border border-gray-300">
+                            <div id="connectionStatus" class="flex items-center justify-center gap-2 mb-2 p-2 rounded-lg border border-gray-300 bg-white">
                                 <span class="font-semibold text-sm text-secondary">Connection:</span>
                                 <span id="networkIcon" class="text-xl"></span>
                                 <span id="networkText" class="font-bold">Checking...</span>
@@ -394,7 +405,7 @@
                     <div id="advanced-features-section" class="p-6 bg-card-section rounded-xl border border-theme shadow-inner h-fit -mt-4">
                          <h2 id="exportTitle" class="text-xl font-bold mb-4 border-b-2 border-theme pb-2"></h2>
                          
-                         <!-- NEW: TARGET SETUP CSV UPLOAD -->
+                         <!-- TARGET SETUP CSV UPLOAD -->
                          <div class="mb-4">
                              <h3 class="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Daily Target Setup</h3>
                              <input type="file" id="csvFileInput" accept=".csv" class="hidden">
@@ -468,17 +479,53 @@
         </div>
     </div>
     
-    <!-- STICKY PROGRESS FOOTER -->
-    <div id="sticky-progress-footer" class="fixed bottom-0 left-0 w-full bg-white shadow-[0_-8px_15px_-3px_rgba(0,0,0,0.15)] border-t border-gray-300 z-50 p-2 lg:p-3 no-print transition-all duration-300">
-        <div class="max-w-7xl mx-auto flex flex-col gap-1.5">
-            <div class="flex justify-between items-center text-xs lg:text-sm font-bold px-1">
+    <!-- STICKY GLASSY PROGRESS FOOTER -->
+    <div id="sticky-progress-footer" class="fixed left-0 w-full z-50 no-print transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex flex-col gap-1.5 px-4 lg:px-8">
+            <div class="flex justify-between items-center text-xs lg:text-sm font-bold px-1 drop-shadow-sm">
                 <span id="targetText" class="text-blue-700">🎯 Target: 0</span>
                 <span id="progressText" class="text-gray-800 font-extrabold text-lg">0%</span>
                 <span id="pendingText" class="text-red-500">⏳ Pending: 0</span>
             </div>
             <!-- Segmented Progress Bar -->
-            <div id="segmentedProgressBar" class="w-full h-4 lg:h-5 bg-gray-200 rounded-full overflow-hidden flex shadow-inner">
+            <div id="segmentedProgressBar" class="w-full h-5 lg:h-6 bg-white/50 backdrop-blur-md rounded-full overflow-hidden flex shadow-inner border border-gray-300/50">
                 <!-- JS will populate segments here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- CSV PREVIEW MODAL -->
+    <div id="csv-preview-modal" class="fixed inset-0 bg-black bg-opacity-75 items-center justify-center z-[60] hidden p-4">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col">
+            <h3 class="text-xl font-bold mb-2 text-primary flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                CSV Upload Preview
+            </h3>
+            <p class="text-sm text-secondary mb-4">කරුණාකර දත්ත නිවැරදි දැයි තහවුරු කරන්න. මෙහි පෙන්වා ඇත්තේ 'WAYBILL ID' තීරුවෙන් ලබාගත් දත්ත වේ.</p>
+            
+            <div class="overflow-y-auto flex-grow border border-gray-200 rounded-lg shadow-inner mb-4 max-h-[50vh]">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-100 sticky top-0 shadow-sm">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">#</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Waybill ID</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Order ID</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Recipient Name</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">City</th>
+                        </tr>
+                    </thead>
+                    <tbody id="csvPreviewTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- JS injects rows here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="flex justify-end gap-4 mt-auto">
+                 <button id="cancelCsvBtn" class="px-6 py-2 rounded-lg font-semibold shadow-md btn btn-secondary">Cancel</button>
+                 <button id="confirmCsvBtn" class="px-6 py-2 rounded-lg font-bold shadow-md btn btn-primary flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> 
+                    Confirm & Set Target
+                 </button>
             </div>
         </div>
     </div>
@@ -500,7 +547,7 @@
     <!-- PRINT AREA -->
     <div id="print-area" class="hidden"></div>
 
-    <!-- Audio Files (Still needed for main screen manual entry) -->
+    <!-- Audio Files -->
     <audio id="successSound" src="play.mp3" preload="auto"></audio>
     <audio id="errorSound" src="error.mp3" preload="auto"></audio>
     <audio id="milestoneSound" src="goal.mp3" preload="auto"></audio>
@@ -511,7 +558,8 @@
         const MILESTONE_COUNT = 10; 
 
         let scannedBarcodes = [];
-        let targetBarcodes = []; // NEW: Store daily targets
+        let targetBarcodes = []; 
+        let pendingExtractedWaybills = []; 
 
         let currentSessionId = null;
         let currentlyViewingBarcodes = [];
@@ -519,7 +567,6 @@
         let allSessions = [];
         let recycleBin = [];
         let isTouchLocked = false;
-        let countUpdateInterval = null;
         let isVoiceMode = localStorage.getItem('oms_voiceMode') === 'true';
         let voiceLanguage = localStorage.getItem('oms_voiceLanguage') || 'en';
 
@@ -584,13 +631,16 @@
             voiceLangSelector: document.getElementById('voiceLangSelector'),
             langEnBtn: document.getElementById('langEnBtn'),
             langSiBtn: document.getElementById('langSiBtn'),
-            // Elements for Progress Bar & CSV
             csvFileInput: document.getElementById('csvFileInput'),
             uploadCsvBtn: document.getElementById('uploadCsvBtn'),
             segmentedProgressBar: document.getElementById('segmentedProgressBar'),
             targetText: document.getElementById('targetText'),
             pendingText: document.getElementById('pendingText'),
-            progressText: document.getElementById('progressText')
+            progressText: document.getElementById('progressText'),
+            csvPreviewModal: document.getElementById('csv-preview-modal'),
+            csvPreviewTableBody: document.getElementById('csvPreviewTableBody'),
+            cancelCsvBtn: document.getElementById('cancelCsvBtn'),
+            confirmCsvBtn: document.getElementById('confirmCsvBtn')
         };
 
         function setInitialTexts() { 
@@ -633,37 +683,99 @@
             setTimeout(() => { container.innerHTML = ''; container.style.display = 'none'; }, 3500); 
         }
 
-        // --- CSV UPLOAD LOGIC ---
+        // --- ROBUST CSV PARSER ---
+        function parseCSV(str) {
+            const arr = [];
+            let quote = false;
+            let row = 0, col = 0;
+            for (let c = 0; c < str.length; c++) {
+                let cc = str[c], nc = str[c+1];
+                arr[row] = arr[row] || [];
+                arr[row][col] = arr[row][col] || '';
+                
+                if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
+                if (cc == '"') { quote = !quote; continue; }
+                if (cc == ',' && !quote) { ++col; continue; }
+                if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
+                if (cc == '\n' && !quote) { ++row; col = 0; continue; }
+                if (cc == '\r' && !quote) { ++row; col = 0; continue; }
+                
+                arr[row][col] += cc;
+            }
+            return arr;
+        }
+
+        // --- NEW CSV UPLOAD WITH PREVIEW LOGIC ---
         el.uploadCsvBtn.addEventListener('click', () => el.csvFileInput.click());
+        
         el.csvFileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
 
-            showLoading("Uploading Target...");
+            showLoading("පද්ධතිය කියවමින් පවතී...");
             const reader = new FileReader();
-            reader.onload = async function(event) {
+            
+            reader.onload = function(event) {
                 const text = event.target.result;
-                const rawRows = text.split('\n').map(row => row.trim().replace(/['"]/g, ''));
-                const extractedBarcodes = rawRows.filter(row => row && row.toLowerCase() !== 'barcode' && row.toLowerCase() !== 'id');
-
-                if(extractedBarcodes.length === 0) {
+                const rows = parseCSV(text);
+                
+                if (rows.length < 2) {
                     hideLoading();
-                    Swal.fire('Error', 'No valid barcodes found in CSV.', 'error');
+                    Swal.fire('Error', 'CSV ෆයිල් එක හිස් හෝ දත්ත නොමැත.', 'error');
                     return;
                 }
 
-                try {
-                    await apiCall('setDailyTarget', { sessionId: currentSessionId, targetBarcodes: extractedBarcodes });
-                    targetBarcodes = extractedBarcodes;
-                    updateUiFromState();
-                    hideLoading();
-                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `Target set to ${extractedBarcodes.length} items.`, showConfirmButton: false, timer: 2500 });
-                } catch (err) {
-                    hideLoading();
-                    Swal.fire('Error', 'Failed to save target to cloud.', 'error');
+                const headers = rows[0].map(h => h.trim().toUpperCase());
+                
+                let waybillIdx = headers.findIndex(h => h === 'WAYBILL ID' || h.includes('WAYBILL'));
+                let orderIdIdx = headers.findIndex(h => h === 'ORDER ID');
+                let nameIdx = headers.findIndex(h => h === 'RECIPIENT NAME');
+                let cityIdx = headers.findIndex(h => h === 'RECIPIENT CITY');
+                
+                if(waybillIdx === -1) waybillIdx = 0;
+                if(orderIdIdx === -1) orderIdIdx = 1;
+                if(nameIdx === -1) nameIdx = 4;
+                if(cityIdx === -1) cityIdx = 8;
+
+                pendingExtractedWaybills = [];
+                let tableHtml = '';
+                let validRowCount = 0;
+
+                for (let i = 1; i < rows.length; i++) {
+                    const rowData = rows[i];
+                    if (!rowData || rowData.length === 0 || !rowData[waybillIdx] || rowData[waybillIdx].trim() === '') continue;
+                    
+                    const waybill = rowData[waybillIdx].trim();
+                    const orderId = rowData[orderIdIdx] ? rowData[orderIdIdx].trim() : '-';
+                    const recName = rowData[nameIdx] ? rowData[nameIdx].trim() : '-';
+                    const recCity = rowData[cityIdx] ? rowData[cityIdx].trim() : '-';
+
+                    pendingExtractedWaybills.push(waybill);
+                    validRowCount++;
+
+                    tableHtml += `
+                        <tr class="hover:bg-blue-50 transition-colors">
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${validRowCount}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-blue-600">${waybill}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${orderId}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${recName}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${recCity}</td>
+                        </tr>
+                    `;
                 }
-                el.csvFileInput.value = "";
+
+                if (pendingExtractedWaybills.length === 0) {
+                    hideLoading();
+                    Swal.fire('Error', 'වලංගු Waybill IDs කිසිවක් සොයාගත නොහැකි විය.', 'error');
+                    return;
+                }
+
+                el.csvPreviewTableBody.innerHTML = tableHtml;
+                hideLoading();
+                el.csvPreviewModal.style.display = 'flex';
+                el.csvFileInput.value = ""; 
             };
+            
             reader.onerror = function() {
                 hideLoading();
                 Swal.fire('Error', 'Could not read CSV file.', 'error');
@@ -671,16 +783,37 @@
             reader.readAsText(file);
         });
 
-        // --- PROGRESS DASHBOARD UPDATE LOGIC ---
+        el.cancelCsvBtn.addEventListener('click', () => {
+            el.csvPreviewModal.style.display = 'none';
+            pendingExtractedWaybills = [];
+        });
+
+        el.confirmCsvBtn.addEventListener('click', async () => {
+            el.csvPreviewModal.style.display = 'none';
+            showLoading("Cloud එකට Save කරමින් පවතී...");
+            
+            try {
+                await apiCall('setDailyTarget', { sessionId: currentSessionId, targetBarcodes: pendingExtractedWaybills });
+                targetBarcodes = pendingExtractedWaybills;
+                updateUiFromState();
+                hideLoading();
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `Orders ${pendingExtractedWaybills.length} ක් සාර්ථකව යාවත්කාලීන විය.`, showConfirmButton: false, timer: 3000 });
+                pendingExtractedWaybills = []; 
+            } catch (err) {
+                hideLoading();
+                Swal.fire('Error', 'Cloud එකට Save කිරීම අසාර්ථක විය.', 'error');
+            }
+        });
+
+
+        // --- PROGRESS DASHBOARD LOGIC (NO LAG) ---
         function updateProgressDashboard() {
-            // We read array backwards so it visually draws from oldest scan to newest scan
             const chronologicalScans = [...currentlyViewingBarcodes].reverse();
             const targetCount = targetBarcodes.length || 0;
             let validCount = 0;
             let invalidCount = 0;
 
             let segmentsHtml = '';
-            // If they scan more than target, the bar resizes to fit the extra scans.
             const totalSlots = Math.max(targetCount, chronologicalScans.length);
 
             if (totalSlots === 0) {
@@ -714,7 +847,7 @@
         }
 
 
-        // --- SYNCED SCAN FUNCTION ---
+        // --- INSTANT SYNCED SCAN FUNCTION ---
         function handleOrderScanAddBarcode(scannedCode = null) {
             const barcode = scannedCode || el.orderScanInput.value.trim();
             if (barcode === "") { if(!scannedCode) el.orderScanInput.focus(); return false; }
@@ -727,10 +860,10 @@
                 if (errorAudio) { errorAudio.pause(); errorAudio.currentTime = 0; errorAudio.play().catch(console.error); }
                 isSuccess = false;
             } else {
+                // සෘජුවම Local Array එකට දානවා (No lag)
                 scannedBarcodes.unshift(barcode); 
                 currentlyViewingBarcodes = scannedBarcodes; 
                 
-                // Show red status toast if scanned barcode is not in target (only if target exists)
                 if(targetBarcodes.length > 0 && !targetBarcodes.includes(barcode)) {
                     showStatusMessage(`Out of Target: ${barcode}`, "error");
                 } else {
@@ -748,8 +881,8 @@
                      showCompletionAnimation();
                 }
 
-                updateUiFromState();
-                autoSaveSession();
+                updateUiFromState(); // UI එක Local දත්ත වලින් ක්ෂණිකව අප්ඩේට් කරනවා
+                autoSaveSession();   // Sheet එකට සේව් වෙන්න යවන්නේ Background එකෙන්
                 isSuccess = true;
             }
             
@@ -828,7 +961,6 @@
         }
 
         function updateUiFromState() {
-            // SYNC TO LOCAL STORAGE FOR CAMERA APP
             if (currentlyViewingSessionId === currentSessionId) {
                 localStorage.setItem('oms_scannedBarcodes', JSON.stringify(scannedBarcodes));
             }
@@ -841,7 +973,6 @@
             el.scannedOrderBarcodesList.innerHTML = "";
             const isViewingToday = currentlyViewingSessionId === currentSessionId;
             
-            // Header is already styled correctly in HTML, just changing text if viewing older
             if(isViewingToday) {
                 el.scannedListHeader.innerHTML = `
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -861,7 +992,7 @@
             if (currentCount > 0) {
                 currentlyViewingBarcodes.forEach((barcode, index) => {
                     const li = document.createElement("li");
-                    li.style.animation = `slideInFromLeft 0.5s ease-out forwards`;
+                    li.style.animation = `slideInFromLeft 0.3s ease-out forwards`;
                     const scanNumber = currentCount - index; 
                     if(isViewingToday) { 
                         li.className = "flex items-center justify-between p-2 rounded-md text-base bg-white shadow-sm border border-gray-200 text-gray-800";
@@ -883,7 +1014,6 @@
         }
 
         async function initializeApp() {
-            showLoading("Initializing System...");
             setInitialTexts(); 
             currentSessionId = getTodaySessionId(); 
             currentlyViewingSessionId = currentSessionId;
@@ -893,9 +1023,12 @@
             updateClock(); setInterval(updateClock, 1000); 
             loadRecycleBin(); 
             
-            // Set Initial Voice State
             el.audioToggle.checked = isVoiceMode;
             if(isVoiceMode) { el.voiceLangSelector.classList.remove('hidden'); updateLangButtons(); }
+
+            // ලෝඩ් වෙන්න වෙලා යන එක නැති කරන්න මුලින්ම UI එක පෙන්වනවා
+            el.mainContentWrapper.style.display = 'flex';
+            updateUiFromState();
 
             el.addOrderBarcodeBtn.addEventListener("click", () => handleOrderScanAddBarcode());
             el.returnToTodayBtn.addEventListener("click", returnToTodayView);
@@ -914,13 +1047,11 @@
             el.touchLockBtn.addEventListener("click", handleTouchLockToggle);
             el.audioToggle.addEventListener('change', toggleAudioMode);
 
-            // OPEN CAMERA IN NEW WINDOW
             el.openCameraBtn.addEventListener("click", () => {
                 localStorage.setItem('oms_scannedBarcodes', JSON.stringify(scannedBarcodes));
                 window.open('camera.html', 'cameraWindow', 'width=450,height=800,scrollbars=no,resizable=no');
             });
 
-            // LISTEN FOR CHANGES FROM CAMERA WINDOW
             window.addEventListener('storage', (e) => {
                 if (e.key === 'oms_scannedBarcodes' && e.newValue) {
                     const newBarcodes = JSON.parse(e.newValue);
@@ -936,26 +1067,9 @@
             window.addEventListener('offline', updateNetworkStatus);
             updateNetworkStatus(); 
             
-            // Fetch daily target and scanned data
-            await reloadTodaysData();
-            await loadAllSessions();
-            
-            updateUiFromState();
-            startPollingCount();
-            hideLoading();
-        }
-
-        function startPollingCount() {
-            if (countUpdateInterval) clearInterval(countUpdateInterval);
-            countUpdateInterval = setInterval(() => {
-                if (navigator.onLine && currentlyViewingSessionId === currentSessionId) {
-                    fetchTodayCount(true); 
-                }
-            }, 3000);
-        }
-
-        function stopPollingCount() {
-            if (countUpdateInterval) { clearInterval(countUpdateInterval); countUpdateInterval = null; }
+            // ඩේටා ටික Background එකෙන් ගන්නවා (හිරවෙන්නේ නෑ)
+            reloadTodaysData();
+            loadAllSessions();
         }
 
         let barcodeBuffer = '';
@@ -1155,7 +1269,7 @@
         
         async function handleManualSave() {
             el.manualSaveBtn.disabled = true; el.manualSaveBtnText.classList.add('hidden'); el.manualSaveBtnSpinner.classList.remove('hidden');
-            try { await autoSaveSession(true); await fetchTodayCount(); } catch (error) {} 
+            try { await autoSaveSession(true); } catch (error) {} 
             finally { el.manualSaveBtn.disabled = !navigator.onLine; el.manualSaveBtnText.classList.remove('hidden'); el.manualSaveBtnSpinner.classList.add('hidden'); }
         }
         
@@ -1246,25 +1360,6 @@
                 el.saveToSheetBtn.disabled = !navigator.onLine; 
                 el.saveBtnText.classList.remove('hidden'); el.saveBtnSpinner.classList.add('hidden'); 
             }); 
-        }
-
-        async function fetchTodayCount(silent = false) {
-            if (!navigator.onLine) return;
-            try {
-                const data = await apiCall("getSessionData", { sessionId: currentSessionId });
-                const fetchedBarcodes = data.session.data.barcodes || [];
-                const fetchedTargets = data.session.data.targetBarcodes || [];
-                
-                scannedBarcodes = fetchedBarcodes;
-                targetBarcodes = fetchedTargets; // Sync target from server
-                
-                if (currentlyViewingSessionId === currentSessionId) {
-                     currentlyViewingBarcodes = [...scannedBarcodes];
-                     updateUiFromState(); 
-                }
-            } catch (error) {
-                // error handling ignored for silent polling
-            }
         }
 
         async function reloadTodaysData() {

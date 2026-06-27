@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Amaya's Oaths Party</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500&family=Great+Vibes&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome for Icons (Gavel, Scales, Books) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind Config for Custom Colors/Fonts -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'invite-pink': '#fdf2f8',
+                        'invite-gold': '#d4af37',
+                        'invite-navy': '#1e3a8a',
+                        'invite-dark': '#0f172a'
+                    },
+                    fontFamily: {
+                        'serif': ['"Playfair Display"', 'serif'],
+                        'sans': ['"Inter"', 'sans-serif'],
+                        'script': ['"Great Vibes"', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: #fdf2f8; /* Soft pink background */
+            scroll-behavior: smooth;
+        }
+
+        /* Hide scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 10;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Initial Envelope Screen */
+        #welcome-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background-color: #1e3a8a; /* Navy blue */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+        }
+
+        .envelope-btn {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(212, 175, 55, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+        }
+
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s ease-out;
+        }
+
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Paused Overlay */
+        #pause-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(2px);
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .touch-indicator {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 30;
+            animation: bounce 2s infinite;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translate(-50%, 0); }
+            40% { transform: translate(-50%, -15px); }
+            60% { transform: translate(-50%, -7px); }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-invite-dark selection:bg-invite-gold selection:text-white">
+
+    <!-- Audio Element (Soft Piano) -->
+    <!-- Using a royalty-free soft piano track for demonstration -->
+    <audio id="bg-music" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_29fb6ee885.mp3?filename=soft-piano-109407.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Welcome / Envelope Screen -->
+    <div id="welcome-screen">
+        <div class="text-center px-6" id="welcome-content">
+            <i class="fa-solid fa-scale-balanced text-invite-gold text-4xl mb-6"></i>
+            <h1 class="font-serif text-3xl md:text-4xl text-white mb-2">Amaya's Oaths Party</h1>
+            <p class="font-sans text-blue-200 text-sm tracking-widest uppercase mb-12" id="welcome-guest-name">Loading Invitation...</p>
+            
+            <button id="open-btn" class="envelope-btn glass-card bg-white/10 text-white border border-invite-gold/50 px-8 py-4 rounded-full font-serif text-lg flex items-center gap-3 mx-auto hover:bg-white/20 transition-colors hidden">
+                <i class="fa-regular fa-envelope-open text-invite-gold"></i>
+                Tap to Open
+            </button>
+            
+            <div id="loading-spinner" class="mt-8">
+                <i class="fa-solid fa-circle-notch fa-spin text-invite-gold text-2xl"></i>
+            </div>
+            <p id="error-msg" class="text-red-400 mt-4 text-sm hidden">Invalid Invitation Link. Please check your URL.</p>
+        </div>
+    </div>
+
+    <!-- Pause Indicator -->
+    <div id="pause-overlay">
+        <div class="bg-invite-dark/80 text-white px-6 py-3 rounded-full font-sans text-sm tracking-widest flex items-center gap-3">
+            <i class="fa-solid fa-pause"></i> PAUSED
+        </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="touch-indicator text-slate-400 text-xs tracking-widest flex flex-col items-center gap-1" id="scroll-indicator">
+        <span>HOLD TO PAUSE</span>
+        <i class="fa-solid fa-chevron-down mt-1"></i>
+    </div>
+
+    <!-- 3D Background Canvas -->
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Main Content -->
+    <div class="content-wrapper min-h-screen flex flex-col items-center pb-24" id="main-content" style="display: none;">
+        
+        <!-- Section 1: Intro -->
+        <section class="min-h-screen w-full flex items-center justify-center px-4 py-20">
+            <div class="glass-card max-w-lg w-full rounded-[2rem] p-8 md:p-12 text-center relative overflow-hidden fade-in-up gs-reveal">
+                <!-- Decorative Corners -->
+                <div class="absolute top-4 left-4 text-invite-gold/30 text-2xl"><i class="fa-solid fa-leaf"></i></div>
+                <div class="absolute top-4 right-4 text-invite-gold/30 text-2xl"><i class="fa-solid fa-leaf" style="transform: scaleX(-1);"></i></div>
+                
+                <h2 class="font-script text-4xl md:text-5xl text-invite-navy mb-4 mt-4">Oaths Party</h2>
+                <p class="font-sans text-slate-600 text-sm leading-relaxed mb-8">
+                    You are cordially invited<br>to celebrate the Enrollment of
+                </p>
+                
+                <h1 class="font-script text-5xl md:text-6xl text-blue-600 mb-6 font-bold" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.05);">Amaya Muhandiramge</h1>
+                
+                <p class="font-serif text-slate-700 italic text-lg mb-8">
+                    as an Attorney-at-Law<br>
+                    of the Supreme Court of Sri Lanka
+                </p>
+                
+                <div class="w-16 h-px bg-gradient-to-r from-transparent via-invite-gold to-transparent mx-auto mb-8"></div>
+                
+                <p class="font-sans text-slate-600 text-sm leading-relaxed mb-4">
+                    Dear <strong id="card-guest-name" class="text-invite-navy">Guest</strong>,<br><br>
+                    Join us for an evening of joyous celebration, dinner, and fellowship to mark this momentous milestone.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 2: Details & 3D Elements -->
+        <section class="min-h-screen w-full flex flex-col items-center justify-center px-4 py-20 relative">
+            
+            <!-- Floating Icons representing 3D elements (Animated via GSAP) -->
+            <div class="absolute left-[10%] top-[20%] text-5xl text-invite-gold/40 gs-float-1"><i class="fa-solid fa-gavel"></i></div>
+            <div class="absolute right-[15%] top-[40%] text-6xl text-invite-navy/20 gs-float-2"><i class="fa-solid fa-book-open"></i></div>
+            <div class="absolute left-[20%] bottom-[30%] text-7xl text-invite-gold/30 gs-float-3"><i class="fa-solid fa-scale-balanced"></i></div>
+
+            <div class="glass-card max-w-lg w-full rounded-[2rem] p-8 md:p-12 text-center z-10 fade-in-up gs-reveal">
+                <h3 class="font-serif text-2xl text-invite-navy mb-8 border-b border-slate-200 pb-4 inline-block px-8">Event Details</h3>
+                
+                <div class="space-y-8">
+                    <div>
+                        <i class="fa-regular fa-calendar text-invite-gold text-2xl mb-3"></i>
+                        <h4 class="font-sans font-bold text-slate-800 uppercase tracking-widest text-sm mb-1">Date</h4>
+                        <p class="font-serif text-lg text-slate-600">Friday, 10<sup>th</sup> of July 2026</p>
+                    </div>
+                    
+                    <div>
+                        <i class="fa-regular fa-clock text-invite-gold text-2xl mb-3"></i>
+                        <h4 class="font-sans font-bold text-slate-800 uppercase tracking-widest text-sm mb-1">Time</h4>
+                        <p class="font-serif text-lg text-slate-600">6:00 PM onwards</p>
+                    </div>
+                    
+                    <div>
+                        <i class="fa-solid fa-location-dot text-invite-gold text-2xl mb-3"></i>
+                        <h4 class="font-sans font-bold text-slate-800 uppercase tracking-widest text-sm mb-1">Venue</h4>
+                        <p class="font-serif text-lg text-slate-600 font-semibold mb-2">Sundale Hotel</p>
+                        <p class="font-sans text-sm text-slate-500 mb-4">Divulapitiya</p>
+                        
+                        <a href="https://maps.app.goo.gl/placeholder" target="_blank" class="inline-block bg-invite-navy text-white text-xs uppercase tracking-wider px-6 py-2.5 rounded-full hover:bg-blue-800 transition-colors pointer-events-auto shadow-md">
+                            View on Map <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: RSVP (Stop Auto-scroll here) -->
+        <section class="min-h-screen w-full flex items-center justify-center px-4 py-20" id="rsvp-section">
+            <div class="glass-card max-w-lg w-full rounded-[2rem] p-8 md:p-10 text-center fade-in-up gs-reveal relative">
+                
+                <div id="rsvp-form-container">
+                    <h3 class="font-serif text-2xl text-invite-navy mb-2">RSVP</h3>
+                    <p class="font-sans text-xs text-slate-500 mb-8 uppercase tracking-widest">Kindly respond by July 1st</p>
+                    
+                    <form id="rsvp-form" class="space-y-5 text-left pointer-events-auto">
+                        
+                        <!-- Radio Buttons -->
+                        <div class="flex flex-col gap-3">
+                            <label class="relative flex cursor-pointer items-center rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:bg-slate-50 transition-colors has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50/50">
+                                <div class="flex items-center h-5">
+                                    <input type="radio" name="rsvp_status" value="Attending" class="h-4 w-4 border-slate-300 text-emerald-600 focus:ring-emerald-600" required>
+                                </div>
+                                <div class="ml-3 flex flex-col">
+                                    <span class="font-sans font-medium text-slate-900">Joyfully Accepts</span>
+                                    <span class="font-sans text-xs text-slate-500">I wouldn't miss it!</span>
+                                </div>
+                            </label>
+                            
+                            <label class="relative flex cursor-pointer items-center rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:bg-slate-50 transition-colors has-[:checked]:border-rose-500 has-[:checked]:bg-rose-50/50">
+                                <div class="flex items-center h-5">
+                                    <input type="radio" name="rsvp_status" value="Not_Attending" class="h-4 w-4 border-slate-300 text-rose-600 focus:ring-rose-600">
+                                </div>
+                                <div class="ml-3 flex flex-col">
+                                    <span class="font-sans font-medium text-slate-900">Regretfully Declines</span>
+                                    <span class="font-sans text-xs text-slate-500">Sending love from afar</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Message Box -->
+                        <div>
+                            <label for="message" class="block font-sans text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Leave a Message for Amaya (Optional)</label>
+                            <textarea id="message" name="message" rows="3" class="block w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-700 focus:border-invite-gold focus:outline-none focus:ring-1 focus:ring-invite-gold transition-colors" placeholder="Congratulations on your enrollment!"></textarea>
+                        </div>
+
+                        <!-- Blinking Submit Button -->
+                        <button type="submit" id="submit-rsvp-btn" class="w-full bg-invite-gold text-white font-serif font-bold text-lg py-4 rounded-xl shadow-[0_0_15px_rgba(212,175,55,0.5)] hover:bg-yellow-600 hover:shadow-[0_0_25px_rgba(212,175,55,0.7)] transition-all animate-pulse">
+                            Send RSVP
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Success Message (Hidden initially) -->
+                <div id="rsvp-success" class="hidden py-8">
+                    <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-500 text-3xl">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h3 class="font-serif text-2xl text-slate-800 mb-2">Thank You!</h3>
+                    <p class="font-sans text-slate-600 text-sm">Your response has been recorded.<br>We appreciate your love and support.</p>
+                </div>
+
+            </div>
+            
+            <div class="absolute bottom-4 text-center w-full pb-4">
+                <p class="text-[10px] text-slate-400 font-sans tracking-widest uppercase">Designed with ❤️ for Amaya</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // --- Configuration ---
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyi0Nti2-5JTLZ_7LI5d1ROB0JHO7wkVHWJ4Vm5fHrQPxa8ubE9HAJNwLEaNY9M3gGszA/exec';
+        let currentGuest = null;
+        let isAutoScrolling = false;
+        let scrollAnimationId = null;
+        let userHasInteracted = false;
+
+        // --- 1. Fetch Guest Data based on URL ID ---
+        async function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const guestId = urlParams.get('id');
+
+            if (!guestId) {
+                // If no ID is provided, show error
+                document.getElementById('loading-spinner').classList.add('hidden');
+                document.getElementById('error-msg').classList.remove('hidden');
+                document.getElementById('welcome-guest-name').innerText = "Access Denied";
+                return;
+            }
+
+            try {
+                // Fetch using GET (CORS friendly via GAS JSON output)
+                const response = await fetch(`${SCRIPT_URL}?action=getGuest&id=${guestId}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error("Guest not found");
+                }
+
+                currentGuest = data;
+                
+                // Populate Names
+                const fullName = `${currentGuest.title} ${currentGuest.name}`;
+                document.getElementById('welcome-guest-name').innerText = `For ${fullName}`;
+                document.getElementById('card-guest-name').innerText = fullName;
+
+                // Show Open Button
+                document.getElementById('loading-spinner').classList.add('hidden');
+                document.getElementById('open-btn').classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById('loading-spinner').classList.add('hidden');
+                document.getElementById('error-msg').classList.remove('hidden');
+                document.getElementById('welcome-guest-name').innerText = "Invitation Not Found";
+            }
+        }
+
+        // --- 2. Open Invitation Logic ---
+        document.getElementById('open-btn').addEventListener('click', () => {
+            const welcomeScreen = document.getElementById('welcome-screen');
+            const mainContent = document.getElementById('main-content');
+            const audio = document.getElementById('bg-music');
+            
+            // Start Audio
+            audio.volume = 0.5;
+            audio.play().catch(e => console.log("Audio play blocked", e));
+            
+            // Hide welcome, show content
+            welcomeScreen.style.transform = 'translateY(-100vh)';
+            welcomeScreen.style.opacity = '0';
+            
+            setTimeout(() => {
+                welcomeScreen.style.display = 'none';
+                mainContent.style.display = 'flex';
+                
+                // Initialize Animations & Scrolling
+                initAnimations();
+                startAutoScroll();
+                
+                // Update 'Opened' status in Google Sheets (in background)
+                if(currentGuest && currentGuest.id) {
+                    fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({ action: 'updateOpened', id: currentGuest.id })
+                    });
+                }
+            }, 1000);
+        });
+
+        // --- 3. Auto Scroll & Touch Pause Logic ---
+        function startAutoScroll() {
+            isAutoScrolling = true;
+            let scrollSpeed = 0.7; // pixels per frame
+            
+            function step() {
+                if (isAutoScrolling && !userHasInteracted) {
+                    window.scrollBy(0, scrollSpeed);
+                    
+                    // Stop autoscroll if we reached the RSVP section
+                    const rsvpSection = document.getElementById('rsvp-section');
+                    const rect = rsvpSection.getBoundingClientRect();
+                    if (rect.top <= window.innerHeight / 2) {
+                        isAutoScrolling = false;
+                        document.getElementById('scroll-indicator').style.display = 'none';
+                    }
+                }
+                scrollAnimationId = requestAnimationFrame(step);
+            }
+            scrollAnimationId = requestAnimationFrame(step);
+        }
+
+        // Handle Touch / Mouse Hold to Pause
+        const htmlBody = document.querySelector('body');
+        const pauseOverlay = document.getElementById('pause-overlay');
+        const audio = document.getElementById('bg-music');
+
+        function pauseAction(e) {
+            // Don't pause if clicking on inputs/buttons
+            if(['INPUT', 'TEXTAREA', 'BUTTON', 'A', 'LABEL'].includes(e.target.tagName)) {
+                userHasInteracted = true;
+                return; 
+            }
+            isAutoScrolling = false;
+            pauseOverlay.style.opacity = '1';
+            audio.pause();
+        }
+
+        function resumeAction() {
+            isAutoScrolling = true;
+            pauseOverlay.style.opacity = '0';
+            audio.play().catch(e => {});
+        }
+
+        // Mobile Touch
+        htmlBody.addEventListener('touchstart', pauseAction, {passive: true});
+        htmlBody.addEventListener('touchend', resumeAction);
+        // Desktop Mouse
+        htmlBody.addEventListener('mousedown', pauseAction);
+        htmlBody.addEventListener('mouseup', resumeAction);
+        // User manually scrolling stops auto-scroll temporarily
+        window.addEventListener('wheel', () => { userHasInteracted = true; });
+        window.addEventListener('touchmove', () => { userHasInteracted = true; }, {passive: true});
+
+
+        // --- 4. RSVP Submission ---
+        document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentGuest) return;
+
+            const submitBtn = document.getElementById('submit-rsvp-btn');
+            const status = document.querySelector('input[name="rsvp_status"]:checked').value;
+            const message = document.getElementById('message').value;
+
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending...';
+            submitBtn.disabled = true;
+
+            try {
+                // Post to Google Sheets
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        action: 'updateRSVP',
+                        id: currentGuest.id,
+                        rsvp: status,
+                        message: message
+                    })
+                });
+
+                // Show Success
+                document.getElementById('rsvp-form-container').style.display = 'none';
+                document.getElementById('rsvp-success').classList.remove('hidden');
+
+            } catch(e) {
+                alert("Something went wrong. Please try again.");
+                submitBtn.innerHTML = 'Send RSVP';
+                submitBtn.disabled = false;
+            }
+        });
+
+        // --- 5. GSAP Animations ---
+        function initAnimations() {
+            // Fade in elements on scroll
+            gsap.utils.toArray('.gs-reveal').forEach(elem => {
+                ScrollTrigger.create({
+                    trigger: elem,
+                    start: "top 85%",
+                    onEnter: () => elem.classList.add('visible'),
+                    once: true
+                });
+            });
+
+            // Float animations for icons
+            gsap.to('.gs-float-1', { y: -30, rotation: 10, duration: 3, repeat: -1, yoyo: true, ease: "sine.inOut" });
+            gsap.to('.gs-float-2', { y: 20, rotation: -15, duration: 4, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 1 });
+            gsap.to('.gs-float-3', { y: -25, rotation: 5, duration: 3.5, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 0.5 });
+        }
+
+
+        // --- 6. Three.js Magical Background (Gold/Pink Particles) ---
+        function initThreeJS() {
+            const canvas = document.getElementById('three-canvas');
+            const scene = new THREE.Scene();
+            
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 50;
+
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            // Particles Geometry
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = window.innerWidth < 768 ? 400 : 800; // Less particles on mobile
+            
+            const posArray = new Float32Array(particlesCount * 3);
+            for(let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 200; // Spread wide
+            }
+            
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+            // Particle Material (Gold color)
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.4,
+                color: '#d4af37',
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+
+            // Animation Loop
+            let mouseY = 0;
+            window.addEventListener('mousemove', (e) => { mouseY = e.clientY / window.innerHeight - 0.5; });
+            window.addEventListener('scroll', () => { mouseY = window.scrollY / 1000; });
+
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                const elapsedTime = clock.getElapsedTime();
+                
+                // Gentle rotation
+                particlesMesh.rotation.y = elapsedTime * 0.05;
+                particlesMesh.rotation.x = elapsedTime * 0.02;
+                
+                // Parallax effect based on scroll/mouse
+                camera.position.y = -mouseY * 10;
+                
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Resize handler
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        // Start initialization
+        initThreeJS();
+        init();
+
+    </script>
+</body>
+</html>
